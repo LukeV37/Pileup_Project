@@ -1,8 +1,9 @@
-[submodule "delphes/Delphes-3.5.0"]
-	path = delphes/Delphes-3.5.0
-	url = https://github.com/delphes/delphes.git
-    branch = 3.5.0
-[submodule "pythia/src/releases"]
-	path = pythia/src/Pythia8312
+[submodule "software/Pythia-8.312"]
+	path = software/Pythia-8.312
 	url = https://gitlab.com/Pythia8/releases.git
-    branch = pythia8312
+[submodule "software/HepMC-2.06.11"]
+	path = software/HepMC-2.06.11
+	url = https://gitlab.cern.ch/hepmc/HepMC.git
+[submodule "software/Delphes-3.5.0"]
+	path = software/Delphes-3.5.0
+	url = https://github.com/delphes/delphes.git
