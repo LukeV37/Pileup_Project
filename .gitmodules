@@ -1,6 +1,6 @@
 [submodule "delphes/Delphes-3.5.0"]
 	path = delphes/Delphes-3.5.0
-	url = git@github.com:delphes/delphes.git
+	url = https://github.com/delphes/delphes.git
     branch = 3.5.0
 [submodule "pythia/src/releases"]
 	path = pythia/src/Pythia8312
