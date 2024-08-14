@@ -37,13 +37,13 @@ void find_ip(double pT, double eta, double phi, double xProd, double yProd, doub
 
 // Program Parameters
 int nevents = 1000;     // Number of HS Events to Generate
-int mu = 60;            // Average number of PU processes overlayed on HS event
+int mu = 0;            // Average number of PU processes overlayed on HS event
 double pTmin_jet = 25;  // Min pT used for clustering jets using anti-kt
 
 int main()
 {
     // Initialiaze output ROOT file
-    TFile *output = new TFile("dataset.root", "recreate");
+    TFile *output = new TFile("../output/dataset.root", "recreate");
     
     // Define tree with ALL tracks showering in pythia
     //TTree *PythiaParticles = new TTree("pythia", "pythia");
