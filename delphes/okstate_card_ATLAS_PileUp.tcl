@@ -68,10 +68,11 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile ../../delphes/pythia.pileup
+  #set PileUpFile ./output/pythia.pileup
+  set PileUpFile ../../delphes/output/pythia.pileup
 
   # average expected pile up
-  set MeanPileUp 200
+  set MeanPileUp 60
 
    # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -731,7 +732,7 @@ module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
 
-#  add Branch TrackMerger/tracks Track Track
+  add Branch TrackMerger/tracks Track Track
   add Branch Calorimeter/towers Tower Tower
 
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
