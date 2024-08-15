@@ -10,6 +10,11 @@ Install the submodules:
 
 Please be patient while submodules build...
 
+To run the chain Pythia Sim→HepMC Output→Delphes Sim→ROOT Output:
+```
+./run.sh
+```
+
 The `pythia` folder contains code to run a simulation to generate particles. See `pythia/README.md` for more details.
 
 The `delphes` folder contains code to simulate the ATLAS detector. See `delphes/README.md` for more details.
