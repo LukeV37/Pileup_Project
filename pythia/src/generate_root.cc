@@ -17,8 +17,11 @@ int nevents = 1000;     // Number of HS Events to Generate
 int mu = 60;            // Average number of PU processes overlayed on HS event
 double pTmin_jet = 25;  // Min pT used for clustering jets using anti-kt
 
+// Prototype functions
 void find_ip(double pT, double eta, double phi, double xProd, double yProd, double zProd, double& d0, double& z0);
+int trace_origin(const Pythia8::Event& event, int ix, int& bcflag);
 
+// Main pythia loop
 int main()
 {
     // Initialiaze output ROOT file
@@ -38,7 +41,7 @@ int main()
 
     std::vector<float> trk_pT, trk_eta, trk_phi;
     std::vector<float> trk_q, trk_d0, trk_z0;
-    std::vector<int> trk_pid, trk_label;
+    std::vector<int> trk_pid, trk_label, trk_origin, trk_bcflag;
     FastJet->Branch("trk_pT", &trk_pT);
     FastJet->Branch("trk_eta", &trk_eta);
     FastJet->Branch("trk_phi", &trk_phi);
@@ -47,6 +50,8 @@ int main()
     FastJet->Branch("trk_z0", &trk_z0);
     FastJet->Branch("trk_pid", &trk_pid);
     FastJet->Branch("trk_label", &trk_label);
+    FastJet->Branch("trk_origin", &trk_origin);
+    FastJet->Branch("trk_bcflag", &trk_bcflag);
 
     std::vector<int> jet_ntracks;
     std::vector<int> jet_track_index;
@@ -55,13 +60,53 @@ int main()
 
     // Configure HS Process
     Pythia8::Pythia pythia;
-    pythia.readFile("ttbar.cmnd");
+    pythia.readString("Beams:idA = 2212");
+    pythia.readString("Beams:idB = 2212");
+    pythia.readString("Beams:eCM = 14.e3");
+    pythia.readString("Beams:allowVertexSpread = on");
+    pythia.readString("Beams:sigmaVertexX = 0.3");
+    pythia.readString("Beams:sigmaVertexY = 0.3");
+    pythia.readString("Beams:sigmaVertexZ = 50.");
+
+    // the process: ttbar
+    //pythia.readString("Top:gg2ttbar = on");
+    //pythia.readString("Top:qqbar2ttbar = on");
+    // the process: Z'->tt
+    pythia.readString("NewGaugeBoson:ffbar2gmZZprime = on");
+    pythia.readString("32:onMode = off");
+    pythia.readString("32:onIfAny = 6");
+    pythia.readString("32:m0 = 1000.");
+
+    // ttbar->l+jets
+    //pythia.readString("24:onMode = off");
+    //pythia.readString("24:onPosIfAny = 11 13");
+    //pythia.readString("24:onNegIfAny = 1 2 3 4 5");
+    // ttbar->allhad
+    pythia.readString("24:onMode = off");
+    pythia.readString("24:onIfAny = 1 2 3 4 5");
     pythia.init();
 
     // Configure PU Process
     Pythia8::Pythia pythiaPU;
-    pythiaPU.readFile("pileup.cmnd");
+    pythiaPU.readString("Beams:idA = 2212");
+    pythiaPU.readString("Beams:idB = 2212");
+    pythiaPU.readString("Beams:eCM = 14.e3");
+    pythiaPU.readString("Beams:allowVertexSpread = on");
+    pythiaPU.readString("Beams:sigmaVertexX = 0.3");
+    pythiaPU.readString("Beams:sigmaVertexY = 0.3");
+    pythiaPU.readString("Beams:sigmaVertexZ = 50.");
+    pythiaPU.readString("SoftQCD:all = on");
     if (mu > 0) pythiaPU.init();
+
+    // Configure HS Process
+    //Pythia8::Pythia pythia;
+    //pythia.readFile("ttbar.cmnd");
+    //pythia.init();
+
+    // Configure PU Process
+    //Pythia8::Pythia pythiaPU;
+    //pythiaPU.readFile("pileup.cmnd");
+    //if (mu > 0) pythiaPU.init();
 
     // Configure antikt_algorithm
     std::map<TString, fastjet::JetDefinition> jetDefs;
@@ -217,6 +262,11 @@ int main()
                 trk_z0.push_back(event_trk_z0[ix]);
                 trk_pid.push_back(event_trk_pid[ix]);
                 trk_label.push_back(event_trk_label[ix]);
+                int bcflag = 0;
+                int origin = event_trk_label[ix]<0 ? trace_origin(event,ix,bcflag):-999
+;
+                trk_origin.push_back(origin);
+                trk_bcflag.push_back(bcflag);
                 ++ntracks;
               }
             jet_ntracks.push_back(ntracks);
@@ -252,4 +302,29 @@ void find_ip(double pT, double eta, double phi, double xProd, double yProd, doub
   static TRandom3 rnd;
   d0 += rnd.Gaus(0,sigma_d0);
   z0 += rnd.Gaus(0,sigma_z0);
+}
+
+int trace_origin(const Pythia8::Event& event, int ix, int& bcflag) {
+  // see if found W or top
+  int id = event[ix].id();
+  int ida = abs(id);
+  if (ida==24 || ida==6) return id;
+  // check b/c origin
+  if (bcflag<5 && (ida/100==5 || ida/1000==5)) bcflag = 5;
+  else if (bcflag<4 && (ida/100==4 || ida/1000==4)) bcflag = 4;
+  // keep digging
+  int mother1 = event[ix].mother1();
+  int mother2 = event[ix].mother2();
+  if (mother1==0) return 0;
+  if (mother2==0 || mother2==mother1 || mother2<mother1) return trace_origin(event, mother1, bcflag);
+  for (int j = mother1; j<=mother2; ++j) {
+    // only trace quarks
+    int ida = abs(event[j].id());
+    if (ida>=1 && ida<=5) {
+      int id = trace_origin(event, j, bcflag);
+      if (abs(id)==24 || abs(id)==6) return id;
+    }
+  }
+  // nothing good
+  return 0;
 }
