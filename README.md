@@ -30,7 +30,7 @@ The `delphes` folder contains code to simulate the ATLAS detector. See `delphes/
 Tested on Ubuntu 22.04, EL9 lxplus machine, and even WSL2.
 
 >[!NOTE]
-> ROOT must be installed on the system before `./install.sh` script can be run. \
+> [ROOT](https://root.cern/install/) must be installed on the system before `./install.sh` script can be run. \
 > Use `root-config --cflags --libs` to see if you have a successful ROOT install. \
 > \
 > On GPURIG2, please add the following lines to your `.bashrc` file in your home directory:
