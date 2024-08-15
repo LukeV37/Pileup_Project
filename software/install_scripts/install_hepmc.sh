@@ -7,6 +7,6 @@ cmake -DCMAKE_INSTALL_PREFIX=../hepmc-install \
       -Dmomentum:STRING=MEV \
       -Dlength:STRING=MM \
       ../
-make -j
+make -j4
 make test
 make install

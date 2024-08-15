@@ -4,5 +4,5 @@ git submodule init
 git submodule update
 mkdir fastjet-install
 ./autogen.sh --prefix="$PWD/fastjet-install/"
-make -j
+make -j4
 make install
