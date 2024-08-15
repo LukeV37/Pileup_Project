@@ -7,6 +7,3 @@
 [submodule "software/Delphes-3.5.0"]
 	path = software/Delphes-3.5.0
 	url = https://github.com/delphes/delphes.git
-[submodule "software/FastJet-3.4.2"]
-	path = software/FastJet-3.4.2
-	url = https://gitlab.com/fastjet/fastjet.git
