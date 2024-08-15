@@ -27,7 +27,7 @@ The `pythia` folder contains code to run a simulation to generate particles. See
 
 The `delphes` folder contains code to simulate the ATLAS detector. See `delphes/README.md` for more details.
 
-Tested on Ubuntu 22.04 machine and on EL9 lxplus machine.
+Tested on Ubuntu 22.04, EL9 lxplus machine, and even WSL2.
 
 >[!NOTE]
 > root must be installed on the system before `./install.sh` script can be run.
