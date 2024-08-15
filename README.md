@@ -5,8 +5,7 @@ git clone --recursive git@github.com:LukeV37/Pileup_Dataset_Production.git
 
 Install the submodules:
 ```
-cd software/install_scipts
-./install_submodules.sh
+./install.sh
 ```
 
 Please be patient while submodules build...
