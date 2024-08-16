@@ -11,3 +11,5 @@ To run the delphes simluation use:
 This will create a `dataset.root` in the `output` folder.
 
 To modify configuration of the delphes simulation, please modify `okstate_card_ATLAS_PileUp.tcl`.
+
+More delphes documentation can be found [here](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook).
