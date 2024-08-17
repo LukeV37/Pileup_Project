@@ -3,6 +3,7 @@
 
 #include <vector>
 using std::vector;
+using std::set;
 
 #include <iostream>
 using std::cout;
@@ -11,27 +12,29 @@ using std::endl;
 #include <cmath>
 
 struct Jet {
-  Jet(double aE, double aPx, double aPy, double aPz): E(aE), px(aPx), py(aPy), pz(aPz) {}
+  Jet(double aE, double aPx, double aPy, double aPz, int aIx): E(aE), px(aPx), py(aPy), pz(aPz), ix(aIx), m(-1.) {}
 
-  double mass() const { return sqrt(E*E - px*px - py*py - pz*pz); }
+  double mass() { if (m<0) m = sqrt(E*E - px*px - py*py - pz*pz); return m; }
 
   double E, px, py, pz;
+  int ix;
+  double m; // lazily evaluated
 };
 
 struct Jet2: public Jet {
-  Jet2(Jet& j1, Jet& j2, int aI1, int aI2): Jet(j1.E+j2.E, j1.px+j2.px, j1.py+j2.py, j1.pz+j2.pz), i1(aI1), i2(aI2) { wmatch = pow((mass()-mean)/sigma,2); }
+  Jet2(Jet& j1, Jet& j2): Jet(j1.E+j2.E, j1.px+j2.px, j1.py+j2.py, j1.pz+j2.pz, j1.ix), ix2(j2.ix) { wmatch = pow((mass()-mean)/sigma,2); }
 
-  int i1, i2;
+  int ix2;
   double wmatch;
   static double mean, sigma;
 };
 
 struct Jet3: public Jet {
-  Jet3(Jet2& jw, Jet& jb, int aIb): Jet(jw.E+jb.E, jw.px+jb.px, jw.py+jb.py, jw.pz+jb.pz), i1(jw.i1), i2(jw.i2), ib(aIb) { tmatch = jw.wmatch + pow((mass()-mean)/sigma,2); }
+  Jet3(Jet2& jw, Jet& jb): Jet(jw.E+jb.E, jw.px+jb.px, jw.py+jb.py, jw.pz+jb.pz, jw.ix), ix2(jw.ix2), ib(jb.ix) { tmatch = jw.wmatch + pow((mass()-mean)/sigma,2); }
 
-  bool overlaps(const Jet3& other) { return i1==other.i1 || i2==other.i2 || ib==other.ib; }
+  bool overlaps(const Jet3& other) { return ix==other.ix || ix2==other.ix2 || ix==other.ix2 || ix2==other.ix || ib==other.ib; }
 
-  int i1, i2, ib;
+  int ix2, ib;
   double tmatch;
   static double mean, sigma;
 };
@@ -63,6 +66,9 @@ void add_ttbar_match()
   // new branches to add
   vector<int> jet_ttbar_match;
   TBranch* b_jet_ttbar_match = treefj->Branch("jet_ttbar_match", &jet_ttbar_match);
+
+  float ttmass;
+  TBranch* b_ttmass = treefj->Branch("ttmass", &ttmass);
 
   // existing branches to use
 
@@ -100,12 +106,13 @@ void add_ttbar_match()
 
     int njet = jet_ntracks->size();
     jet_ttbar_match = vector<int>(6,-1);
+    ttmass = 0;
     if (njet>=6) {
       // collect good jets
       vector<Jet> vj, vb;
       for (int ijet = 0; ijet<njet; ++ijet) {
 	if ((*jet_pt)[ijet]<20. || fabs((*jet_eta)[ijet])>2.5) continue;
-	TLorentzVector v; v.SetPtEtaPhiM((*jet_pt)[ijet],(*jet_eta)[ijet],(*jet_phi)[ijet],(*jet_m)[ijet]); Jet jet(v.E(),v.Px(),v.Py(),v.Pz());
+	TLorentzVector v; v.SetPtEtaPhiM((*jet_pt)[ijet],(*jet_eta)[ijet],(*jet_phi)[ijet],(*jet_m)[ijet]); Jet jet(v.E(),v.Px(),v.Py(),v.Pz(),ijet);
 	// figure out the jet b/c flag (truth b-tagging)
 	int ntr = (*jet_ntracks)[ijet];
 	if (ntr<=0) continue;
@@ -130,9 +137,9 @@ void add_ttbar_match()
 	vector<Jet3> tops;
 	for (int i1 = 0; i1<nj-1; ++i1) {
 	  for (int i2 = i1+1; i2<nj; ++i2) {
-	    Jet2 v12(vj[i1], vj[i2], i1, i2);
+	    Jet2 v12(vj[i1], vj[i2]);
 	    for (int ib = 0; ib<nb; ++ib) {
-	      tops.push_back(Jet3(v12, vb[ib], ib));
+	      tops.push_back(Jet3(v12, vb[ib]));
 	    }
 	  }
 	}
@@ -151,17 +158,27 @@ void add_ttbar_match()
 
 	if (found) {
 	  // record the results
-	  jet_ttbar_match[0] = tops[k1].i1;
-	  jet_ttbar_match[1] = tops[k1].i2;
+	  jet_ttbar_match[0] = tops[k1].ix;
+	  jet_ttbar_match[1] = tops[k1].ix2;
 	  jet_ttbar_match[2] = tops[k1].ib;
-	  jet_ttbar_match[3] = tops[k2].i1;
-	  jet_ttbar_match[4] = tops[k2].i2;
+	  jet_ttbar_match[3] = tops[k2].ix;
+	  jet_ttbar_match[4] = tops[k2].ix2;
 	  jet_ttbar_match[5] = tops[k2].ib;
+	  /* check if the numbers are unique
+	  set<int> unique_jet_ids(jet_ttbar_match.begin(), jet_ttbar_match.end());
+	  if (unique_jet_ids.size()!=jet_ttbar_match.size()) {
+	    cout << ievfj << ": jet ids are not unique:";
+	    for (int i = 0; i<jet_ttbar_match.size(); ++i) cout << " " << jet_ttbar_match[i];
+	    cout << endl;
+	  }*/
+	  Jet2 toppair(tops[k1],tops[k2]);
+	  ttmass = toppair.mass();
 	}
       }
     }
 
     b_jet_ttbar_match->Fill();
+    b_ttmass->Fill();
   }
 
   // save the output
