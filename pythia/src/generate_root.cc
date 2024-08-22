@@ -14,16 +14,30 @@
 
 #include "helper_functions.h"
 
-// Program Parameters
-int nevents = 10000;     // Number of HS Events to Generate
-int mu = 0;            // Average number of PU processes overlayed on HS event
-double pTmin_jet = 25;  // Min pT used for clustering jets using anti-kt
-
 // Main pythia loop
-int main()
+int main(int argc, char *argv[])
 {
+    std::cout << "You have entered " << argc 
+         << " arguments:" << std::endl; 
+  
+    // Using a while loop to iterate through arguments 
+    char *settings[] = { " ", "Number of Events: ", "Average Pileup (mu): ", "Process: ", "Min pT of Jet: " };
+    int i = 0; 
+    while (i < argc) { 
+        std::cout << settings[i] << argv[i] 
+             << std::endl; 
+        i++; 
+    } 
+
+    int nevents = atoi(argv[1]);
+    int mu = atoi(argv[2]);
+    char *process = argv[3];
+    double pTmin_jet = atof(argv[4]);
+    
+    TString filename = TString("dataset_")+TString(process)+TString("_mu")+TString(argv[2])+TString("_NumEvents")+TString(argv[1])+TString("_MinJetpT")+TString(argv[4])+TString(".root");
+
     // Initialiaze output ROOT file
-    TFile *output = new TFile("../output/dataset.root", "recreate");
+    TFile *output = new TFile("../output/"+filename, "recreate");
     
     // Define local vars to be linked to TTree branches
     int id, status, ID, label;
@@ -59,42 +73,13 @@ int main()
 
     // Configure HS Process
     Pythia8::Pythia pythia;
-    pythia.readString("Beams:idA = 2212");
-    pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 14.e3");
-    pythia.readString("Beams:allowVertexSpread = on");
-    pythia.readString("Beams:sigmaVertexX = 0.3");
-    pythia.readString("Beams:sigmaVertexY = 0.3");
-    pythia.readString("Beams:sigmaVertexZ = 50.");
-
-    // the process: ttbar
-    //pythia.readString("Top:gg2ttbar = on");
-    //pythia.readString("Top:qqbar2ttbar = on");
-    // the process: Z'->tt
-    pythia.readString("NewGaugeBoson:ffbar2gmZZprime = on");
-    pythia.readString("32:onMode = off");
-    pythia.readString("32:onIfAny = 6");
-    pythia.readString("32:m0 = 1000.");
-
-    // ttbar->l+jets
-    //pythia.readString("24:onMode = off");
-    //pythia.readString("24:onPosIfAny = 11 13");
-    //pythia.readString("24:onNegIfAny = 1 2 3 4 5");
-    // ttbar->allhad
-    pythia.readString("24:onMode = off");
-    pythia.readString("24:onIfAny = 1 2 3 4 5");
+    if (strcmp(process,"ttbar")==0) pythia.readFile("ttbar.cmnd");
+    if (strcmp(process,"zprime")==0) pythia.readFile("zprime.cmnd");
     pythia.init();
 
     // Configure PU Process
     Pythia8::Pythia pythiaPU;
-    pythiaPU.readString("Beams:idA = 2212");
-    pythiaPU.readString("Beams:idB = 2212");
-    pythiaPU.readString("Beams:eCM = 14.e3");
-    pythiaPU.readString("Beams:allowVertexSpread = on");
-    pythiaPU.readString("Beams:sigmaVertexX = 0.3");
-    pythiaPU.readString("Beams:sigmaVertexY = 0.3");
-    pythiaPU.readString("Beams:sigmaVertexZ = 50.");
-    pythiaPU.readString("SoftQCD:all = on");
+    pythiaPU.readFile("pileup.cmnd");
     if (mu > 0) pythiaPU.init();
 
     // Configure antikt_algorithm

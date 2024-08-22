@@ -5,7 +5,7 @@
 ! The settings here are illustrative, not always physics-motivated.
 
 ! 1) Settings used in the main program.
-Main:numberOfEvents = 20000         ! number of events to generate
+Main:numberOfEvents = 1000         ! number of events to generate
 Main:timesAllowErrors = 3          ! how many aborts before run stops
 
 ! 2) Settings related to output in init(), next() and stat().
@@ -26,8 +26,11 @@ Beams:sigmaVertexY = 0.3           ! Set Y-Vertex spread
 Beams:sigmaVertexZ = 50.           ! Set Z-Vertex spread
 
 ! 4) Settings for the hard-process generation.
-! Example: pileup production.
-SoftQCD:all = on
+! Example: t-tbar production.
+NewGaugeBoson:ffbar2gmZZprime = on ! Z' -> t tbar
+32:onMode = off                    ! turn off Z'
+32:onIfAny = 6                     ! turn on Z' iff decay to top
+32:m0 = 1000                       ! Set mass of Z' to 1000 GeV
 
 ! 5) Switch on/off the key event generation steps.
 #PartonLevel:MPI = off              ! no multiparton interactions
