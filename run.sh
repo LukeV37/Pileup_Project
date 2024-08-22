@@ -1,6 +1,6 @@
 #!/bin/bash
 cd pythia
-./run.sh hepmc
+./generate.sh hepmc
 cd ../delphes
 ./convert_pileup.sh
 ./run_ATLAS_sim.sh
