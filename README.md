@@ -1,12 +1,12 @@
 ## Quick Start
 Clone the repo over ssh using:
 ```
-git clone --recursive git@github.com:LukeV37/Pileup_Dataset_Production.git
+git clone --recursive git@github.com:LukeV37/Pileup_Project.git
 ```
 
 Or clone the repo over https using:
 ```
-git clone --recursive https://github.com/LukeV37/Pileup_Dataset_Production.git
+git clone --recursive https://github.com/LukeV37/Pileup_Project.git
 ```
 
 Install the submodules:
