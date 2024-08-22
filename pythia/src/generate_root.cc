@@ -158,23 +158,23 @@ int main()
             event_trk_label.push_back(label);
 
             if (not p.isFinal()) continue;
-	    // A.X.: skip neutrinos
-	    if (abs(id)==12 || abs(id)==14 || abs(id)==16) continue;
-            fastjet::PseudoJet fj(p.px(), p.py(), p.pz(), p.e());
-            fj.set_user_index(ID);
-            stbl_ptcls.push_back(fj);
-            ptcls_hs.push_back(p);
+            // A.X.: skip neutrinos
+            if (abs(id)==12 || abs(id)==14 || abs(id)==16) continue;
+                fastjet::PseudoJet fj(p.px(), p.py(), p.pz(), p.e());
+                fj.set_user_index(ID);
+                stbl_ptcls.push_back(fj);
+                ptcls_hs.push_back(p);
         }
 
         // Add in pileup particles!
         int n_inel = 0;
-	if (mu>0) {
-	    n_inel = gRandom->Poisson(mu);
-	    printf("Overlaying particles from %i pileup interactions!\n", n_inel);
-	}
+        if (mu>0) {
+            n_inel = gRandom->Poisson(mu);
+            printf("Overlaying particles from %i pileup interactions!\n", n_inel);
+        }
         for (int i_pu= 0; i_pu<n_inel; ++i_pu) {
             if (!pythiaPU.next()) continue;
-              for (int j = 0; j < pythiaPU.event.size(); ++j) {
+            for (int j = 0; j < pythiaPU.event.size(); ++j) {
                 auto &p = pythiaPU.event[j];
                 id = p.id();
                 status = p.status();
@@ -209,36 +209,36 @@ int main()
                 event_trk_label.push_back(label);
 
                 if (not p.isFinal()) continue;
-		// A.X.: skip neutrinos
-		if (abs(id)==12 || abs(id)==14 || abs(id)==16) continue;
-                fastjet::PseudoJet fj(p.px(), p.py(), p.pz(), p.e());
-                fj.set_user_index(ID);
-                stbl_ptcls.push_back(fj);
-                ptcls_pu.push_back(p);
-              }
+                // A.X.: skip neutrinos
+                if (abs(id)==12 || abs(id)==14 || abs(id)==16) continue;
+                        fastjet::PseudoJet fj(p.px(), p.py(), p.pz(), p.e());
+                        fj.set_user_index(ID);
+                        stbl_ptcls.push_back(fj);
+                        ptcls_pu.push_back(p);
+            }
         }
 
-	// prepare for filling
-	jet_pt.clear();
-	jet_eta.clear();
-	jet_phi.clear();
-	jet_m.clear();
+        // prepare for filling
+        jet_pt.clear();
+        jet_eta.clear();
+        jet_phi.clear();
+        jet_m.clear();
 
-	trk_pT.clear();
-	trk_eta.clear();
-	trk_phi.clear();
-	trk_e.clear();
-	trk_q.clear();
-	trk_d0.clear();
-	trk_z0.clear();
-	trk_pid.clear();
-	trk_label.clear();
-	trk_origin.clear();
-	trk_bcflag.clear();
+        trk_pT.clear();
+        trk_eta.clear();
+        trk_phi.clear();
+        trk_e.clear();
+        trk_q.clear();
+        trk_d0.clear();
+        trk_z0.clear();
+        trk_pid.clear();
+        trk_label.clear();
+        trk_origin.clear();
+        trk_bcflag.clear();
 
-	jet_ntracks.clear();
-	jet_track_index.clear();
-	int track_index = 0;
+        jet_ntracks.clear();
+        jet_track_index.clear();
+        int track_index = 0;
 
         // Cluster stable particles using anti-kt
         for (auto jetDef:jetDefs) {
@@ -252,8 +252,8 @@ int main()
                 jet_m.push_back(jet.m());
 
                 // For each particle:
-		jet_track_index.push_back(track_index);
-		int ntracks = 0;
+                jet_track_index.push_back(track_index);
+                int ntracks = 0;
                 for (auto trk:jet.constituents()) {
                     int ix = trk.user_index()-1;
                     trk_pT.push_back(event_trk_pT[ix]);
@@ -271,11 +271,11 @@ int main()
                     trk_bcflag.push_back(bcflag);
                     ++ntracks;
                 }
-		jet_ntracks.push_back(ntracks);
-		track_index += ntracks;
+                jet_ntracks.push_back(ntracks);
+                track_index += ntracks;
             }
         }
-	FastJet->Fill();
+	    FastJet->Fill();
     }
 
     output->Write();
