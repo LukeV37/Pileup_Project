@@ -6,64 +6,21 @@
 #include "TString.h"
 
 #include "Pythia8/Pythia.h"
-//#include "Pythia8Plugins/HepMC3.h"
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
 #include <TRandom.h>
 
-void find_ip(double pT, double eta, double phi, double xProd, double yProd, double zProd, double& d0, double& z0)
-{
-  // calculate IP
-
-  double r = sqrt(pow(xProd,2) + pow(yProd,2));
-  double dphi = phi - atan2(yProd,xProd);
-  if (dphi>M_PI) dphi -= 2*M_PI;
-  else if (dphi<=-M_PI) dphi += 2*M_PI;
-  d0 = r*sin(dphi);
-  z0 = zProd - r*sinh(eta);
-
-  // smear according to resolution
-  // tentative resolution parameterization: ATL-COM-PHYS-2021-377, Figs.12-13
-
-  double sigma_d0 = sqrt(pow(80/pT,2) + pow(4,2))*1e-3; // um->mm
-  double sigma_z0 = sqrt(pow(80/pT,2) + pow(10,2))*1e-3; // um->mm
-
-  static TRandom3 rnd;
-  d0 += rnd.Gaus(0,sigma_d0);
-  z0 += rnd.Gaus(0,sigma_z0);
-}
-
-int trace_origin(const Pythia8::Event& event, int ix, int& bcflag) {
-  // see if found W or top
-  int id = event[ix].id();
-  int ida = abs(id);
-  if (ida==24 || ida==6) return id;
-  // check b/c origin
-  if (bcflag<5 && (ida/100==5 || ida/1000==5)) bcflag = 5;
-  else if (bcflag<4 && (ida/100==4 || ida/1000==4)) bcflag = 4;
-  // keep digging
-  int mother1 = event[ix].mother1();
-  int mother2 = event[ix].mother2();
-  if (mother1==0) return 0;
-  if (mother2==0 || mother2==mother1 || mother2<mother1) return trace_origin(event, mother1, bcflag);
-  for (int j = mother1; j<=mother2; ++j) {
-    // only trace quarks
-    int ida = abs(event[j].id());
-    if (ida>=1 && ida<=5) {
-      int id = trace_origin(event, j, bcflag);
-      if (abs(id)==24 || abs(id)==6) return id;
-    }
-  }
-  // nothing good
-  return 0;
-}
 
 // Program Parameters
 int nevents = 10000;     // Number of HS Events to Generate
 int mu = 0;            // Average number of PU processes overlayed on HS event
 double pTmin_jet = 25;  // Min pT used for clustering jets using anti-kt
+
+// Prototype functions
+void find_ip(double pT, double eta, double phi, double xProd, double yProd, double zProd, double& d0, double& z0);
+int trace_origin(const Pythia8::Event& event, int ix, int& bcflag);
 
 int main()
 {
@@ -157,16 +114,16 @@ int main()
 
         if(!pythia.next()) continue;
 
-	ID = 0;
-	std::vector<float> event_trk_pT;
-	std::vector<float> event_trk_eta;
-	std::vector<float> event_trk_phi;
-	std::vector<float> event_trk_e;
-	std::vector<float> event_trk_q;
-	std::vector<float> event_trk_d0;
-	std::vector<float> event_trk_z0;
-	std::vector<int> event_trk_pid;
-	std::vector<int> event_trk_label;
+        ID = 0;
+        std::vector<float> event_trk_pT;
+        std::vector<float> event_trk_eta;
+        std::vector<float> event_trk_phi;
+        std::vector<float> event_trk_e;
+        std::vector<float> event_trk_q;
+        std::vector<float> event_trk_d0;
+        std::vector<float> event_trk_z0;
+        std::vector<int> event_trk_pid;
+        std::vector<int> event_trk_label;
 
         int entries = pythia.event.size();
         std::vector<Pythia8::Particle> ptcls_hs, ptcls_pu;
@@ -205,15 +162,15 @@ int main()
 
             //PythiaParticles->Fill();
             ID++;
-	    event_trk_pT.push_back(pT);
-	    event_trk_eta.push_back(eta);
-	    event_trk_phi.push_back(phi);
-	    event_trk_e.push_back(e);
-	    event_trk_q.push_back(q);
-	    event_trk_d0.push_back(d0);
-	    event_trk_z0.push_back(z0);
-	    event_trk_pid.push_back(id);
-	    event_trk_label.push_back(label);
+            event_trk_pT.push_back(pT);
+            event_trk_eta.push_back(eta);
+            event_trk_phi.push_back(phi);
+            event_trk_e.push_back(e);
+            event_trk_q.push_back(q);
+            event_trk_d0.push_back(d0);
+            event_trk_z0.push_back(z0);
+            event_trk_pid.push_back(id);
+            event_trk_label.push_back(label);
 
             if (not p.isFinal()) continue;
 	    // A.X.: skip neutrinos
@@ -263,17 +220,16 @@ int main()
 
                 double d0,z0; find_ip(pT,eta,phi,xProd,yProd,zProd,d0,z0);
 
-                //PythiaParticles->Fill();
                 ID++;
-		event_trk_pT.push_back(pT);
-		event_trk_eta.push_back(eta);
-		event_trk_phi.push_back(phi);
-		event_trk_e.push_back(e);
-		event_trk_q.push_back(q);
+            event_trk_pT.push_back(pT);
+            event_trk_eta.push_back(eta);
+            event_trk_phi.push_back(phi);
+            event_trk_e.push_back(e);
+            event_trk_q.push_back(q);
 	        event_trk_d0.push_back(d0);
 	        event_trk_z0.push_back(z0);
-		event_trk_pid.push_back(id);
-		event_trk_label.push_back(label);
+            event_trk_pid.push_back(id);
+            event_trk_label.push_back(label);
 
                 if (not p.isFinal()) continue;
 		// A.X.: skip neutrinos
@@ -283,7 +239,6 @@ int main()
                 stbl_ptcls.push_back(fj);
                 ptcls_pu.push_back(p);
               }
-            //toHepMC.writeNextEvent( pythiaPU );
         }
 
 	// prepare for filling
@@ -323,21 +278,21 @@ int main()
 		jet_track_index.push_back(track_index);
 		int ntracks = 0;
                 for (auto trk:jet.constituents()) {
-		    int ix = trk.user_index()-1;
-		    trk_pT.push_back(event_trk_pT[ix]);
-		    trk_eta.push_back(event_trk_eta[ix]);
-		    trk_phi.push_back(event_trk_phi[ix]);
-		    trk_e.push_back(event_trk_e[ix]);
-		    trk_q.push_back(event_trk_q[ix]);
-		    trk_d0.push_back(event_trk_d0[ix]);
-		    trk_z0.push_back(event_trk_z0[ix]);
-		    trk_pid.push_back(event_trk_pid[ix]);
-		    trk_label.push_back(event_trk_label[ix]);
-		    int bcflag = 0;
-		    int origin = event_trk_label[ix]<0 ? trace_origin(event,ix,bcflag):-999;
-		    trk_origin.push_back(origin);
-		    trk_bcflag.push_back(bcflag);
-		    ++ntracks;
+                    int ix = trk.user_index()-1;
+                    trk_pT.push_back(event_trk_pT[ix]);
+                    trk_eta.push_back(event_trk_eta[ix]);
+                    trk_phi.push_back(event_trk_phi[ix]);
+                    trk_e.push_back(event_trk_e[ix]);
+                    trk_q.push_back(event_trk_q[ix]);
+                    trk_d0.push_back(event_trk_d0[ix]);
+                    trk_z0.push_back(event_trk_z0[ix]);
+                    trk_pid.push_back(event_trk_pid[ix]);
+                    trk_label.push_back(event_trk_label[ix]);
+                    int bcflag = 0;
+                    int origin = event_trk_label[ix]<0 ? trace_origin(event,ix,bcflag):-999;
+                    trk_origin.push_back(origin);
+                    trk_bcflag.push_back(bcflag);
+                    ++ntracks;
                 }
 		jet_ntracks.push_back(ntracks);
 		track_index += ntracks;
@@ -350,4 +305,51 @@ int main()
     output->Close();
 
     return 0;
+}
+
+void find_ip(double pT, double eta, double phi, double xProd, double yProd, double zProd, double& d0, double& z0)
+{
+  // calculate IP
+
+  double r = sqrt(pow(xProd,2) + pow(yProd,2));
+  double dphi = phi - atan2(yProd,xProd);
+  if (dphi>M_PI) dphi -= 2*M_PI;
+  else if (dphi<=-M_PI) dphi += 2*M_PI;
+  d0 = r*sin(dphi);
+  z0 = zProd - r*sinh(eta);
+
+  // smear according to resolution
+  // tentative resolution parameterization: ATL-COM-PHYS-2021-377, Figs.12-13
+
+  double sigma_d0 = sqrt(pow(80/pT,2) + pow(4,2))*1e-3; // um->mm
+  double sigma_z0 = sqrt(pow(80/pT,2) + pow(10,2))*1e-3; // um->mm
+
+  static TRandom3 rnd;
+  d0 += rnd.Gaus(0,sigma_d0);
+  z0 += rnd.Gaus(0,sigma_z0);
+}
+
+int trace_origin(const Pythia8::Event& event, int ix, int& bcflag) {
+  // see if found W or top
+  int id = event[ix].id();
+  int ida = abs(id);
+  if (ida==24 || ida==6) return id;
+  // check b/c origin
+  if (bcflag<5 && (ida/100==5 || ida/1000==5)) bcflag = 5;
+  else if (bcflag<4 && (ida/100==4 || ida/1000==4)) bcflag = 4;
+  // keep digging
+  int mother1 = event[ix].mother1();
+  int mother2 = event[ix].mother2();
+  if (mother1==0) return 0;
+  if (mother2==0 || mother2==mother1 || mother2<mother1) return trace_origin(event, mother1, bcflag);
+  for (int j = mother1; j<=mother2; ++j) {
+    // only trace quarks
+    int ida = abs(event[j].id());
+    if (ida>=1 && ida<=5) {
+      int id = trace_origin(event, j, bcflag);
+      if (abs(id)==24 || abs(id)==6) return id;
+    }
+  }
+  // nothing good
+  return 0;
 }
