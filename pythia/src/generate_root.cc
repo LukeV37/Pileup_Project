@@ -12,7 +12,6 @@
 
 #include <TRandom.h>
 
-
 // Program Parameters
 int nevents = 10000;     // Number of HS Events to Generate
 int mu = 0;            // Average number of PU processes overlayed on HS event
@@ -22,18 +21,17 @@ double pTmin_jet = 25;  // Min pT used for clustering jets using anti-kt
 void find_ip(double pT, double eta, double phi, double xProd, double yProd, double zProd, double& d0, double& z0);
 int trace_origin(const Pythia8::Event& event, int ix, int& bcflag);
 
+// Main pythia loop
 int main()
 {
     // Initialiaze output ROOT file
-    TFile *output = new TFile("dataset.root", "recreate");
+    TFile *output = new TFile("../output/dataset.root", "recreate");
     
-    // Define tree with ALL tracks showering in pythia
-    //TTree *PythiaParticles = new TTree("pythia", "pythia");
+    // Define local vars to be linked to TTree branches
     int id, status, mother1, mother2, daughter1, daughter2, ID, label;
     double pT, eta, phi, e, q, xProd, yProd, zProd, tProd, xDec, yDec, zDec, tDec;
 
     // Define tree with jets clustered using fast jet
-
     TTree *FastJet = new TTree("fastjet", "fastjet");
     std::vector<float> jet_pt, jet_eta, jet_phi, jet_m;
     FastJet->Branch("jet_pt", &jet_pt);
@@ -109,9 +107,6 @@ int main()
     auto &event = pythia.event;
     for(int i=0;i<nevents;i++){
 
-        std::string filename = "hepmc_output/dataset_" + std::to_string(i) + std::string(".hepmc");
-        //Pythia8::Pythia8ToHepMC toHepMC(filename);
-
         if(!pythia.next()) continue;
 
         ID = 0;
@@ -135,13 +130,6 @@ int main()
             id = p.id();
             status = p.status();
             
-            // Mother and Daughter store local event indicies.
-            // Need to find a way to reference global variable instead.
-            //mother1 = p.mother1();
-            //mother2 = p.mother2();
-            //daughter1 = p.daughter1();
-            //daughter2 = p.daughter2();
-
             pT = p.pT();
             eta = p.eta();
             phi = p.phi();
@@ -160,7 +148,6 @@ int main()
 
             double d0,z0; find_ip(pT,eta,phi,xProd,yProd,zProd,d0,z0);
 
-            //PythiaParticles->Fill();
             ID++;
             event_trk_pT.push_back(pT);
             event_trk_eta.push_back(eta);
@@ -180,7 +167,6 @@ int main()
             stbl_ptcls.push_back(fj);
             ptcls_hs.push_back(p);
         }
-        //toHepMC.writeNextEvent( pythia );
 
         // Add in pileup particles!
         int n_inel = 0;
@@ -194,13 +180,6 @@ int main()
                 auto &p = pythiaPU.event[j];
                 id = p.id();
                 status = p.status();
-
-                // Mother and Daughter store local event indicies.
-                // Need to find a way to reference global variable instead.
-                //mother1 = p.mother1();
-                //mother2 = p.mother2();
-                //daughter1 = p.daughter1();
-                //daughter2 = p.daughter2();
 
                 pT = p.pT();
                 eta = p.eta();
@@ -221,15 +200,15 @@ int main()
                 double d0,z0; find_ip(pT,eta,phi,xProd,yProd,zProd,d0,z0);
 
                 ID++;
-            event_trk_pT.push_back(pT);
-            event_trk_eta.push_back(eta);
-            event_trk_phi.push_back(phi);
-            event_trk_e.push_back(e);
-            event_trk_q.push_back(q);
-	        event_trk_d0.push_back(d0);
-	        event_trk_z0.push_back(z0);
-            event_trk_pid.push_back(id);
-            event_trk_label.push_back(label);
+                event_trk_pT.push_back(pT);
+                event_trk_eta.push_back(eta);
+                event_trk_phi.push_back(phi);
+                event_trk_e.push_back(e);
+                event_trk_q.push_back(q);
+                event_trk_d0.push_back(d0);
+                event_trk_z0.push_back(z0);
+                event_trk_pid.push_back(id);
+                event_trk_label.push_back(label);
 
                 if (not p.isFinal()) continue;
 		// A.X.: skip neutrinos
