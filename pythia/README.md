@@ -1,5 +1,5 @@
 ## Quick Start
-To run a pythia simulation either of the following commands:
+To run a pythia simulation use either of the following commands:
 ```
 # Must pass 4 arguments of type int, int, string, float
 ./generate_root.sh {Num HS Events} {Average Pileup mu} {ttbar|zprime} {Min Jet pT (GeV)}
