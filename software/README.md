@@ -8,11 +8,7 @@
 ```
 Take a look at the output, then run `make clean` to delete and cleanup the directory.
 
-Pythia must be configured with external libraries using the `./configure` script. If all other modules installed succesfully, they can be linked using the following command:
-```
-./configure --with-root --with-hepmc2=../HepMC-2.06.11/hepmc-install --with-fastjet3=../FastJet-3.4.2/fastjet-install
-```
-Use a text editor to view the `./configure` script to see more options.
+Pythia must be configured with external libraries using the `./configure` script. Use a text editor to view the `./configure` script to see all supported options.
 
 ### FastJet-3.4.2
 FastJet is open source software for jet finding (ArXiv:[1111.6097](https://arxiv.org/abs/1111.6097)). Pythia simulates and showers particle decays, and FastJet is used to group these particles into collimated streams of particles called jets. A popular jet finding algorithm is anti- $k_t$ (ArXiv:[0802.1189](https://arxiv.org/abs/0802.1189)). To install FastJet, please see `install_scripts/install_fastjet.sh`.
