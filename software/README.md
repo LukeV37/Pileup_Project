@@ -19,3 +19,11 @@ FastJet is open source software for jet finding (ArXiv:[1111.6097](https://arxiv
 ### HepMC-2.06.11
 HepMC is a plain text event record used in high energy physics to store monte carlo information such as particle properties and kinematics. Although HepMC3 exists, there were problems with Delphes and HepMC3, so it was decided to use HepMC2.
 
+##
+>[!NOTE]
+> If there are issues with your submodules, and you would like to reset them to their original state use the following command
+>```
+> cd install_scripts
+> ./clean_submodules.sh
+> ```
+
