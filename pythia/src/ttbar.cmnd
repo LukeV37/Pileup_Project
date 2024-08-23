@@ -20,7 +20,7 @@ Next:numberShowEvent = 0           ! print event record n times
 Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
 Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
 Beams:eCM = 14000.                 ! CM energy of collision
-Beams:allowVertexSpread = off       ! Gaussian Vertex Distribution
+Beams:allowVertexSpread = on       ! Gaussian Vertex Distribution
 Beams:sigmaVertexX = 0.3           ! Set X-Vertex spread
 Beams:sigmaVertexY = 0.3           ! Set Y-Vertex spread
 Beams:sigmaVertexZ = 50.           ! Set Z-Vertex spread
@@ -29,6 +29,8 @@ Beams:sigmaVertexZ = 50.           ! Set Z-Vertex spread
 ! Example: t-tbar production.
 Top:gg2ttbar = on                  ! g g -> t tbar
 Top:qqbar2ttbar = on               ! q qbar -> t tbar
+24:onMode = off                    ! turn off W boson
+24:onIfAny = 1 2 3 4 5             ! turn on W boson iff hadronic decay
 
 ! 5) Switch on/off the key event generation steps.
 #PartonLevel:MPI = off              ! no multiparton interactions
