@@ -52,7 +52,23 @@ The `python` folder contains code that preprocesses the datasets and code for Py
 
 The `analysis` folder contains code used for physics analysis. See `analysis/README.md` for more details.
 
+
+## Dependencies
 Tested on Ubuntu 22.04, EL9 lxplus machine, and even WSL2.
+
+Required Dependencies:
+<ul>
+<li>ROOTv6</li>
+<li>autoconf</li>
+<li>libtool</li>
+<li>automake</li>
+</ul>
+
+ROOTv6 can be installed following instructions [here](https://root.cern/install/).
+
+Other packages can be intalled with `sudo apt install {package}`
+
+## Misc.
 
 >[!WARNING]
 > [ROOT](https://root.cern/install/) must be installed on the system before `./install.sh` script can be run. \
