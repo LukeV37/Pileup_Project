@@ -62,6 +62,7 @@ Required Dependencies:
 <li>autoconf</li>
 <li>libtool</li>
 <li>automake</li>
+<li>tcl</li>
 </ul>
 
 ROOTv6 can be installed following instructions [here](https://root.cern/install/).
