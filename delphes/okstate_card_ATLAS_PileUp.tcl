@@ -732,6 +732,7 @@ module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
 
+  add Branch PileUpMerger/stableParticles PileUpMix GenParticle
   add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
 
