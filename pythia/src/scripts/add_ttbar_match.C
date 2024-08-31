@@ -58,7 +58,7 @@ void add_ttbar_match()
   Jet3::sigma = mass_match[3];
 
   // the existing tree will be updated!
-  TFile* ff = new TFile("../output/tmp.root", "update");
+  TFile* ff = new TFile("../../output/tmp.root", "update");
 
   // fastjet ntuple
   TTree* treefj = (TTree*)ff->Get("fastjet");

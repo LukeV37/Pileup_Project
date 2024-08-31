@@ -12,12 +12,7 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
-#include "helper_functions.h"
-
-#ifdef __MAKECINT__
-#pragma link C++ class std::vector < std::vector<float> >+;
-#pragma link C++ class std::vector < std::vector<int> >+;
-#endif
+#include "include/helper_functions.h"
 
 // Main pythia loop
 int main(int argc, char *argv[])
@@ -102,13 +97,13 @@ int main(int argc, char *argv[])
 
     // Configure HS Process
     Pythia8::Pythia pythia;
-    if (strcmp(process,"ttbar")==0) pythia.readFile("ttbar.cmnd");
-    if (strcmp(process,"zprime")==0) pythia.readFile("zprime.cmnd");
+    if (strcmp(process,"ttbar")==0) pythia.readFile("./config/ttbar.cmnd");
+    if (strcmp(process,"zprime")==0) pythia.readFile("./config/zprime.cmnd");
     pythia.init();
 
     // Configure PU Process
     Pythia8::Pythia pythiaPU;
-    pythiaPU.readFile("pileup.cmnd");
+    pythiaPU.readFile("./config/pileup.cmnd");
     if (mu > 0) pythiaPU.init();
 
     // Configure antikt_algorithm
