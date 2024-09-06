@@ -19,8 +19,8 @@ void add_JVT(TString name)
   TTree* treefj = (TTree*)ff->Get("fastjet");
 
   // new branches to add
-  vector<float> jet_corrJVT;
-  TBranch* b_jet_corrJVT = treefj->Branch("jet_corrJVT", &jet_corrJVT);
+  vector<float> jet_corrJVF;
+  TBranch* b_jet_corrJVF = treefj->Branch("jet_corrJVF", &jet_corrJVF);
   vector<float> jet_RpT;
   TBranch* b_jet_RpT = treefj->Branch("jet_RpT", &jet_RpT);
 
@@ -73,7 +73,7 @@ void add_JVT(TString name)
 
     // loop over jets
     int njet = jet_ntracks->size();
-    jet_corrJVT = vector<float>(njet,-1);
+    jet_corrJVF = vector<float>(njet,-1);
     jet_RpT = vector<float>(njet,-1);
     for (int ijet = 0; ijet<njet; ++ijet) {
         // loop over good tracks
@@ -92,10 +92,10 @@ void add_JVT(TString name)
             if (label==-1) sumpt_hs += weight;
             if (label>=0) sumpt_pu += weight;
         }
-        if ((sumpt_hs+sumpt_pu)>0) jet_corrJVT[ijet] = sumpt_hs/(sumpt_hs+sumpt_pu/(k*num_PU));
+        if ((sumpt_hs+sumpt_pu)>0) jet_corrJVF[ijet] = sumpt_hs/(sumpt_hs+sumpt_pu/(k*num_PU));
         if ((*jet_pT)[ijet]>0) jet_RpT[ijet] = sumpt_hs/(*jet_pT)[ijet];
     }
-    b_jet_corrJVT->Fill();
+    b_jet_corrJVF->Fill();
     b_jet_RpT->Fill();
   }
 
