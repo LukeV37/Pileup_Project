@@ -4,3 +4,4 @@ cd software/install_scripts
 ./install_fastjet.sh
 ./install_delphes.sh
 ./install_pythia.sh
+./install_madgraph.sh
