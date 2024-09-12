@@ -10,8 +10,8 @@ if [ -z "$4" ]; then
 fi
 
 cd src
-make generate_root
-./run_root $1 $2 $3 $4
+make generate_ttbar
+./run_ttbar $1 $2 $3 $4
 make clean
 cd ..
 
