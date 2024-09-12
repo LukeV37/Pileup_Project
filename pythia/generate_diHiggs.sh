@@ -1,19 +1,20 @@
 #!/bin/bash
 
-if [ -z "$2" ]; then
-    echo "Must enter 4 agruments"
-    echo "1: Average PU, mu, (int)"
-    echo "2: MinJetpT (float)"
+if [ -z "$3" ]; then
+    echo "Must enter 3 agruments"
+    echo "1: Process {diHiggs|4b}"
+    echo "2: Average PU, mu, (int)"
+    echo "3: MinJetpT (float)"
     exit 1
 fi
 
 cd src
 make generate_dihiggs
-./run_dihiggs $1 $2
+./run_dihiggs $1 $2 $3
 make clean
 cd ..
 
-name="dataset_diHiggs_4b_mu$1_NumEvents10k_MinJetpT$2.root"
+name="dataset_$1_mu$2_NumEvents10k_MinJetpT$3.root"
 echo "Processing: $name"
 cd src/scripts
 root -q -l -b add_JVT.C\(\""$name"\"\)

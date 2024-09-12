@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
          << " arguments:" << std::endl; 
   
     // Using a while loop to iterate through arguments 
-    char *settings[] = { " ", "Average Pileup (mu): ", "Min pT of Jet: " };
+    char *settings[] = { " ", "Process: ", "Average Pileup (mu): ", "Min pT of Jet: " };
     int i = 0; 
     while (i < argc) { 
         std::cout << settings[i] << argv[i] 
@@ -29,17 +29,19 @@ int main(int argc, char *argv[])
         i++; 
     } 
 
-    if (argc < 2){
-        std::cout << "Error! Must enter 2 arguments" << std::endl;
-        std::cout << "1: Average PU, mu, (int)" << std::endl;
-        std::cout << "2: MinJetpT (float)" << std::endl;
+    if (argc < 3){
+        std::cout << "Error! Must enter 3 arguments" << std::endl;
+        std::cout << "1: Process {diHiggs|4b}" << std::endl;
+        std::cout << "2: Average PU, mu, (int)" << std::endl;
+        std::cout << "3: MinJetpT (float)" << std::endl;
         return 1;
     }
 
-    int mu = atoi(argv[1]);
-    double pTmin_jet = atof(argv[2]);
+    char *process = argv[1];
+    int mu = atoi(argv[2]);
+    double pTmin_jet = atof(argv[3]);
     
-    TString filename = TString("dataset_")+TString("diHiggs_4b")+TString("_mu")+TString(argv[1])+TString("_NumEvents")+TString("10k")+TString("_MinJetpT")+TString(argv[2])+TString(".root");
+    TString filename = TString("dataset_")+TString(argv[1])+TString("_mu")+TString(argv[2])+TString("_NumEvents")+TString("10k")+TString("_MinJetpT")+TString(argv[3])+TString(".root");
 
     // Initialiaze output ROOT file
     TFile *output = new TFile("../output/"+filename, "recreate");
@@ -96,7 +98,8 @@ int main(int argc, char *argv[])
 
     // Initialize Les Houches Event File run. List initialization information.
     pythia.readString("Beams:frameType = 4");
-    pythia.readString("Beams:LHEF = ../../madgraph/DiHiggs/Events/run_01/unweighted_events.lhe.gz");
+    if (strcmp(process,"diHiggs")==0) pythia.readString("Beams:LHEF = ../../madgraph/output/DiHiggs/Events/run_01/unweighted_events.lhe.gz");
+    if (strcmp(process,"4b")==0) pythia.readString("Beams:LHEF = ../../madgraph/output/4b/Events/run_01/unweighted_events.lhe.gz");
 
     // Force H->bb decay
     pythia.readString("25:onMode = off");
