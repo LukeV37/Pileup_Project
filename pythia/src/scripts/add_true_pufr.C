@@ -13,7 +13,7 @@ using std::endl;
 void add_true_pufr(TString name)
 {
   // the existing tree will be updated!
-  TFile* ff = new TFile("../output/"+name, "update");
+  TFile* ff = new TFile("../../output/"+name, "update");
 
   // fastjet ntuple
   TTree* treefj = (TTree*)ff->Get("fastjet");
