@@ -6,7 +6,7 @@ using namespace Pythia8;
 int main()
 {
 	Pythia pythia;
-	pythia.readFile("ttbar.cmnd");
+	pythia.readFile("./config/ttbar.cmnd");
     Pythia8ToHepMC HStoHepMC("../output/ttbar.hepmc");
 
 	int nEventsHS = pythia.mode("Main:numberOfEvents");
@@ -25,7 +25,7 @@ int main()
     }
 
 	Pythia pythiaPU;
-	pythiaPU.readFile("pileup.cmnd");
+	pythiaPU.readFile("./config/pileup.cmnd");
     Pythia8ToHepMC PUtoHepMC("../output/pileup.hepmc");
 
 	int nEventsPU = pythiaPU.mode("Main:numberOfEvents");

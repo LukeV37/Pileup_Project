@@ -1,18 +1,18 @@
 #include <iostream>
+#include <vector>
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <TRandom.h>
 
 #include "Pythia8/Pythia.h"
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
-#include <TRandom.h>
-
-#include "helper_functions.h"
+#include "include/helper_functions.h"
 
 // Main pythia loop
 int main(int argc, char *argv[])
@@ -60,6 +60,21 @@ int main(int argc, char *argv[])
     FastJet->Branch("jet_phi", &jet_phi);
     FastJet->Branch("jet_m", &jet_m);
 
+    std::vector<std::vector<float>> trk_jet_pT, trk_jet_eta, trk_jet_phi, trk_jet_e;
+    std::vector<std::vector<float>> trk_jet_q, trk_jet_d0, trk_jet_z0;
+    std::vector<std::vector<int>> trk_jet_pid, trk_jet_label, trk_jet_origin, trk_jet_bcflag;
+    FastJet->Branch("trk_jet_pT", &trk_jet_pT);
+    FastJet->Branch("trk_jet_eta", &trk_jet_eta);
+    FastJet->Branch("trk_jet_phi", &trk_jet_phi);
+    FastJet->Branch("trk_jet_e", &trk_jet_e);
+    FastJet->Branch("trk_jet_q", &trk_jet_q);
+    FastJet->Branch("trk_jet_d0", &trk_jet_d0);
+    FastJet->Branch("trk_jet_z0", &trk_jet_z0);
+    FastJet->Branch("trk_jet_pid", &trk_jet_pid);
+    FastJet->Branch("trk_jet_label", &trk_jet_label);
+    FastJet->Branch("trk_jet_origin", &trk_jet_origin);
+    FastJet->Branch("trk_jet_bcflag", &trk_jet_bcflag);
+
     std::vector<float> trk_pT, trk_eta, trk_phi, trk_e;
     std::vector<float> trk_q, trk_d0, trk_z0;
     std::vector<int> trk_pid, trk_label, trk_origin, trk_bcflag;
@@ -82,13 +97,13 @@ int main(int argc, char *argv[])
 
     // Configure HS Process
     Pythia8::Pythia pythia;
-    if (strcmp(process,"ttbar")==0) pythia.readFile("ttbar.cmnd");
-    if (strcmp(process,"zprime")==0) pythia.readFile("zprime.cmnd");
+    if (strcmp(process,"ttbar")==0) pythia.readFile("./config/ttbar.cmnd");
+    if (strcmp(process,"zprime")==0) pythia.readFile("./config/zprime.cmnd");
     pythia.init();
 
     // Configure PU Process
     Pythia8::Pythia pythiaPU;
-    pythiaPU.readFile("pileup.cmnd");
+    pythiaPU.readFile("./config/pileup.cmnd");
     if (mu > 0) pythiaPU.init();
 
     // Configure antikt_algorithm
@@ -218,6 +233,18 @@ int main(int argc, char *argv[])
         jet_phi.clear();
         jet_m.clear();
 
+        trk_jet_pT.clear();
+        trk_jet_eta.clear();
+        trk_jet_phi.clear();
+        trk_jet_e.clear();
+        trk_jet_q.clear();
+        trk_jet_d0.clear();
+        trk_jet_z0.clear();
+        trk_jet_pid.clear();
+        trk_jet_label.clear();
+        trk_jet_origin.clear();
+        trk_jet_bcflag.clear();
+
         trk_pT.clear();
         trk_eta.clear();
         trk_phi.clear();
@@ -245,6 +272,10 @@ int main(int argc, char *argv[])
                 jet_phi.push_back(jet.phi());
                 jet_m.push_back(jet.m());
 
+                std::vector<float> trk_pT_tmp, trk_eta_tmp, trk_phi_tmp, trk_e_tmp;
+                std::vector<float> trk_q_tmp, trk_d0_tmp, trk_z0_tmp;
+                std::vector<int> trk_pid_tmp, trk_label_tmp, trk_origin_tmp, trk_bcflag_tmp;
+
                 // For each particle:
                 jet_track_index.push_back(track_index);
                 int ntracks = 0;
@@ -264,9 +295,34 @@ int main(int argc, char *argv[])
                     trk_origin.push_back(origin);
                     trk_bcflag.push_back(bcflag);
                     ++ntracks;
+                    
+                    // L.V. store trks as vector<vector<>>
+                    trk_pT_tmp.push_back(event_trk_pT[ix]);
+                    trk_eta_tmp.push_back(event_trk_eta[ix]);
+                    trk_phi_tmp.push_back(event_trk_phi[ix]);
+                    trk_e_tmp.push_back(event_trk_e[ix]);
+                    trk_q_tmp.push_back(event_trk_q[ix]);
+                    trk_d0_tmp.push_back(event_trk_d0[ix]);
+                    trk_z0_tmp.push_back(event_trk_z0[ix]);
+                    trk_pid_tmp.push_back(event_trk_pid[ix]);
+                    trk_label_tmp.push_back(event_trk_label[ix]);
+                    trk_origin_tmp.push_back(origin);
+                    trk_bcflag_tmp.push_back(bcflag);
                 }
                 jet_ntracks.push_back(ntracks);
                 track_index += ntracks;
+                
+                trk_jet_pT.push_back(trk_pT_tmp);
+                trk_jet_eta.push_back(trk_eta_tmp);
+                trk_jet_phi.push_back(trk_phi_tmp);
+                trk_jet_e.push_back(trk_e_tmp);
+                trk_jet_q.push_back(trk_q_tmp);
+                trk_jet_d0.push_back(trk_d0_tmp);
+                trk_jet_z0.push_back(trk_z0_tmp);
+                trk_jet_pid.push_back(trk_pid_tmp);
+                trk_jet_label.push_back(trk_label_tmp);
+                trk_jet_origin.push_back(trk_origin_tmp);
+                trk_jet_bcflag.push_back(trk_bcflag_tmp);
             }
         }
         FastJet->Fill();
