@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
          << " arguments:" << std::endl; 
   
     // Using a while loop to iterate through arguments 
-    char *settings[] = { " ", "Number of Events: ", "Average Pileup (mu): ", "Process: ", "Min pT of Jet: " };
+    char *settings[] = { " ", "Average Pileup (mu): ", "Min pT of Jet: " };
     int i = 0; 
     while (i < argc) { 
         std::cout << settings[i] << argv[i] 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     int mu = atoi(argv[1]);
     double pTmin_jet = atof(argv[2]);
     
-    TString filename = TString("dataset_")+TString("diHiggs")+TString("_mu")+TString(argv[1])+TString("_NumEvents")+TString("10k")+TString("_MinJetpT")+TString(argv[2])+TString(".root");
+    TString filename = TString("dataset_")+TString("diHiggs_4b")+TString("_mu")+TString(argv[1])+TString("_NumEvents")+TString("10k")+TString("_MinJetpT")+TString(argv[2])+TString(".root");
 
     // Initialiaze output ROOT file
     TFile *output = new TFile("../output/"+filename, "recreate");
