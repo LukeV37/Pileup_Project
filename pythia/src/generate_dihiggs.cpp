@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
     // Initialize Les Houches Event File run. List initialization information.
     pythia.readString("Beams:frameType = 4");
-    pythia.readString("Beams:LHEF = file1.lhe");
+    pythia.readString("Beams:LHEF = ../../madgraph/DiHiggs/Events/run_01/unweighted_events.lhe.gz");
 
     // Force H->bb decay
     pythia.readString("25:onMode = off");
