@@ -2,6 +2,3 @@
 *
 # Except this file
 !.gitignore
-!proc_card.dat
-!run.sh
-!diagrams.pdf
