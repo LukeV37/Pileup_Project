@@ -10,3 +10,5 @@ sed -i "s/\(.*\)= nevents\(.*\)/ $num_Events = nevents\2/" DiHiggs/Cards/run_car
 
 # Generate LHE File
 ./DiHiggs/bin/generate_events
+
+rm py.py
