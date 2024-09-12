@@ -12,7 +12,7 @@
 
 #include <TRandom.h>
 
-#include "helper_functions.h"
+#include "./include/helper_functions.h"
 
 // Main pythia loop
 int main(int argc, char *argv[])
