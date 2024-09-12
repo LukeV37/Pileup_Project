@@ -44,7 +44,7 @@ double Jet2::sigma = 1;
 double Jet3::mean = 0;
 double Jet3::sigma = 1;
 
-void add_ttbar_match()
+void add_ttbar_match(TString name)
 {
   // set the chi2 match parameters here
   //double mass_match[] = {78,5.4,163,12.8}; // mu=0
@@ -58,7 +58,7 @@ void add_ttbar_match()
   Jet3::sigma = mass_match[3];
 
   // the existing tree will be updated!
-  TFile* ff = new TFile("../../output/tmp.root", "update");
+  TFile* ff = new TFile("../output/"+name, "update");
 
   // fastjet ntuple
   TTree* treefj = (TTree*)ff->Get("fastjet");

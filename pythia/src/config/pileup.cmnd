@@ -20,14 +20,14 @@ Next:numberShowEvent = 0           ! print event record n times
 Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
 Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
 Beams:eCM = 14000.                 ! CM energy of collision
-Beams:allowVertexSpread = on       ! Gaussian Vertex Distribution
+Beams:allowVertexSpread = off       ! Gaussian Vertex Distribution
 Beams:sigmaVertexX = 0.3           ! Set X-Vertex spread
 Beams:sigmaVertexY = 0.3           ! Set Y-Vertex spread
 Beams:sigmaVertexZ = 50.           ! Set Z-Vertex spread
 
 ! 4) Settings for the hard-process generation.
 ! Example: pileup production.
-SoftQCD:all = on
+SoftQCD:inelastic = on
 
 ! 5) Switch on/off the key event generation steps.
 #PartonLevel:MPI = off              ! no multiparton interactions
@@ -37,6 +37,7 @@ SoftQCD:all = on
 #HadronLevel:Decay = off            ! no decays
 
 ! 6) Other settings. Can be expanded as desired.
+Tune:pp = 21                        ! use A14 central tune with NNPDF2.3LO
 #Tune:preferLHAPDF = off            ! use internal PDFs when LHAPDF not linked
 #Tune:pp = 6                        ! use Tune 4Cx
 #ParticleDecays:limitTau0 = on      ! set long-lived particle stable ...
