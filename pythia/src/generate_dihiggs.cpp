@@ -29,21 +29,17 @@ int main(int argc, char *argv[])
         i++; 
     } 
 
-    if (argc < 4){
-        std::cout << "Error! Must enter 4 arguments" << std::endl;
-        std::cout << "1: Num Events (int)" << std::endl;
-        std::cout << "2: Average PU, mu, (int)" << std::endl;
-        std::cout << "3: Process {ttbar|zprime}" << std::endl;
-        std::cout << "4: MinJetpT (float)" << std::endl;
+    if (argc < 2){
+        std::cout << "Error! Must enter 2 arguments" << std::endl;
+        std::cout << "1: Average PU, mu, (int)" << std::endl;
+        std::cout << "2: MinJetpT (float)" << std::endl;
         return 1;
     }
 
-    int nevents = atoi(argv[1]);
-    int mu = atoi(argv[2]);
-    char *process = argv[3];
-    double pTmin_jet = atof(argv[4]);
+    int mu = atoi(argv[1]);
+    double pTmin_jet = atof(argv[2]);
     
-    TString filename = TString("dataset_")+TString(process)+TString("_mu")+TString(argv[2])+TString("_NumEvents")+TString(argv[1])+TString("_MinJetpT")+TString(argv[4])+TString(".root");
+    TString filename = TString("dataset_")+TString("diHiggs")+TString("_mu")+TString(argv[1])+TString("_NumEvents")+TString("10k")+TString("_MinJetpT")+TString(argv[2])+TString(".root");
 
     // Initialiaze output ROOT file
     TFile *output = new TFile("../output/"+filename, "recreate");
@@ -97,9 +93,17 @@ int main(int argc, char *argv[])
 
     // Configure HS Process
     Pythia8::Pythia pythia;
-    if (strcmp(process,"ttbar")==0) pythia.readFile("./config/ttbar.cmnd");
-    if (strcmp(process,"zprime")==0) pythia.readFile("./config/zprime.cmnd");
-    pythia.init();
+
+    // Initialize Les Houches Event File run. List initialization information.
+    pythia.readString("Beams:frameType = 4");
+    pythia.readString("Beams:LHEF = file1.lhe");
+
+    // Force H->bb decay
+    pythia.readString("25:onMode = off");
+    pythia.readString("25:onIfAny = 5");
+
+    // If Pythia fails to initialize, exit with error.
+    if (!pythia.init()) return 1;
 
     // Configure PU Process
     Pythia8::Pythia pythiaPU;
@@ -110,11 +114,20 @@ int main(int argc, char *argv[])
     std::map<TString, fastjet::JetDefinition> jetDefs;
     jetDefs["Anti-#it{k_{t}} jets, #it{R} = 0.4"] = fastjet::JetDefinition(fastjet::antikt_algorithm, 0.4, fastjet::E_scheme, fastjet::Best);
 
-    // Start main event loop
-    auto &event = pythia.event;
-    for(int i=0;i<nevents;i++){
+    // Allow for possibility of a few faulty events.
+    int nAbort = 10;
+    int iAbort = 0;
 
-        if(!pythia.next()) continue;
+    // Begin Event Loop; generate until none left in input file
+    while (iAbort < nAbort) {
+
+        // Generate events, and check whether generation failed.
+        if (!pythia.next()) {
+          // If failure because reached end of file then exit event loop.
+          if (pythia.info.atEndOfFile()) break;
+          ++iAbort;
+          continue;
+        }
 
         ID = 0;
         std::vector<float> event_trk_pT;
@@ -132,8 +145,8 @@ int main(int argc, char *argv[])
         std::vector<fastjet::PseudoJet> stbl_ptcls;
 
         // Add in hard scatter particles!
-        for(int j=0;j<event.size();j++){
-            auto &p = event[j];
+        for(int j=0;j<pythia.event.size();j++){
+            auto &p = pythia.event[j];
             id = p.id();
             status = p.status();
             
@@ -291,7 +304,7 @@ int main(int argc, char *argv[])
                     trk_pid.push_back(event_trk_pid[ix]);
                     trk_label.push_back(event_trk_label[ix]);
                     int bcflag = 0;
-                    int origin = event_trk_label[ix]<0 ? trace_origin(event,ix,bcflag):-999;
+                    int origin = event_trk_label[ix]<0 ? trace_origin(pythia.event,ix,bcflag):-999;
                     trk_origin.push_back(origin);
                     trk_bcflag.push_back(bcflag);
                     ++ntracks;
