@@ -29,6 +29,15 @@ int main(int argc, char *argv[])
         i++; 
     } 
 
+    if (argc < 4){
+        std::cout << "Error! Must enter 4 arguments" << std::endl;
+        std::cout << "1: Num Events (int)" << std::endl;
+        std::cout << "2: Average PU, mu, (int)" << std::endl;
+        std::cout << "3: Process {ttbar|zprime}" << std::endl;
+        std::cout << "4: MinJetpT (float)" << std::endl;
+        return 1;
+    }
+
     int nevents = atoi(argv[1]);
     int mu = atoi(argv[2]);
     char *process = argv[3];
