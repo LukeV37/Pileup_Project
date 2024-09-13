@@ -1,6 +1,5 @@
 #!/bin/bash
 cd output
-
 ../../software/MadGraph5-v3.5.5/bin/mg5_aMC ../process_cards/4b_proc_card.dat
 
 # Edit Run Card
