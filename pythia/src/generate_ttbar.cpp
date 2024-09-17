@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
                     trk_pid.push_back(event_trk_pid[ix]);
                     trk_label.push_back(event_trk_label[ix]);
                     int bcflag = 0;
-                    int origin = event_trk_label[ix]<0 ? trace_origin(event,ix,bcflag):-999;
+                    int origin = event_trk_label[ix]<0 ? trace_origin_top(event,ix,bcflag):-999;
                     trk_origin.push_back(origin);
                     trk_bcflag.push_back(bcflag);
                     ++ntracks;
