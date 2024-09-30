@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
          << " arguments:" << std::endl; 
   
     // Using a while loop to iterate through arguments 
-    char *settings[] = { " ", "Process: ", "Average Pileup (mu): ", "Min pT of Jet: " };
+    char *settings[] = { " ", "Process: ", "Average Pileup (mu): ", "Num Events from MadGraph: ", "Min pT of Jet: " };
     int i = 0; 
     while (i < argc) { 
         std::cout << settings[i] << argv[i] 
@@ -29,11 +29,12 @@ int main(int argc, char *argv[])
         i++; 
     } 
 
-    if (argc < 3){
+    if (argc < 4){
         std::cout << "Error! Must enter 3 arguments" << std::endl;
         std::cout << "1: Process {diHiggs|4b}" << std::endl;
         std::cout << "2: Average PU, mu, (int)" << std::endl;
-        std::cout << "3: MinJetpT (float)" << std::endl;
+        std::cout << "3: Num Events from MadGraph (int)" << std::endl;
+        std::cout << "4: MinJetpT (float)" << std::endl;
         return 1;
     }
 
@@ -41,7 +42,7 @@ int main(int argc, char *argv[])
     int mu = atoi(argv[2]);
     double pTmin_jet = atof(argv[3]);
     
-    TString filename = TString("dataset_")+TString(argv[1])+TString("_mu")+TString(argv[2])+TString("_NumEvents")+TString("10k")+TString("_MinJetpT")+TString(argv[3])+TString(".root");
+    TString filename = TString("dataset_")+TString(argv[1])+TString("_mu")+TString(argv[2])+TString("_NumEvents")+TString(argv[3])+TString("_MinJetpT")+TString(argv[4])+TString(".root");
 
     // Initialiaze output ROOT file
     TFile *output = new TFile("../output/"+filename, "recreate");
