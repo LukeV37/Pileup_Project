@@ -1,3 +1,12 @@
+#include <fstream>
+#include <iostream>
+#include <string>
+
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::string;
+
 double sbtf(
   double pt1, double eta1, double phi1, double m1,
   double pt2, double eta2, double phi2, double m2
@@ -15,28 +24,28 @@ double sbtf(
 
   // load tabulated likelihood
   static double* tf = 0;
-  int nbin;
-  double xmin, xmax;
+  static int nbin = 0;
+  static double xmin = 0, xmax = 0;
   if (tf==0) {
-    cout << "loading tabbed function" << endl;
-    ifstream fj("sbfun.json");
+    //cout << "loading tabbed function" << endl;
+    ifstream fj("../include/sbfun.json");
     string s;
     getline(fj,s); // skip {
-    cout << s << endl;
+    //cout << s << endl;
     fj >> s >> nbin >> s;
     tf = new double[nbin];
     fj >> s >> xmin >> s;
     fj >> s >> xmax >> s;
-    cout << "nbin=" << nbin << ", xmin=" << xmin << ", xmax=" << xmax << endl;
+    //cout << "nbin=" << nbin << ", xmin=" << xmin << ", xmax=" << xmax << endl;
     getline(fj,s); // get past end of line
     getline(fj,s); // skip tf
-    cout << "the next line should be '  \"tf\": ['" << endl << s << endl;
+    //cout << "the next line should be '  \"tf\": ['" << endl << s << endl;
     for (int i = 0; i<nbin; ++i) {
       fj >> tf[i] >> s;
     }
     getline(fj,s);
     getline(fj,s);
-    cout << s << endl;
+    //cout << s << endl;
   }
 
   // evaluate likelihood

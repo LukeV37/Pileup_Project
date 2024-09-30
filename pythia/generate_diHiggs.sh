@@ -20,5 +20,8 @@ echo "Processing: $name"
 cd src/scripts
 root -q -l -b add_JVT.C\(\""$name"\"\)
 root -q -l -b add_true_pufr.C\(\""$name"\"\)
-#root -q -l -b add_ttbar_match.C\(\""$name"\"\)
+make
+make all
+./add_Likelihood.exe $name
+make clean
 cd ../..
