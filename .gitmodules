@@ -10,3 +10,6 @@
 [submodule "software/FastJet-3.4.2"]
 	path = software/FastJet-3.4.2
 	url = https://gitlab.com/fastjet/fastjet.git
+[submodule "software/MadGraph5-v3.5.5"]
+	path = software/MadGraph5-v3.5.5
+	url = https://github.com/mg5amcnlo/mg5amcnlo.git
