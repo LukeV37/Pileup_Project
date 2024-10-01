@@ -58,11 +58,12 @@ Tested on Ubuntu 22.04, EL9 lxplus machine, and even WSL2.
 
 Required Dependencies:
 <ul>
-<li>ROOTv6</li>
-<li>autoconf</li>
-<li>libtool</li>
-<li>automake</li>
-<li>tcl</li>
+  <li>ROOTv6</li>
+  <li>autoconf</li>
+  <li>libtool</li>
+  <li>automake</li>
+  <li>tcl</li>
+  <li>gfortran</li>
 </ul>
 
 ROOTv6 can be installed following instructions [here](https://root.cern/install/).
