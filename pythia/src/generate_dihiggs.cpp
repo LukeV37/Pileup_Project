@@ -102,6 +102,8 @@ int main(int argc, char *argv[])
     if (strcmp(process,"diHiggs")==0) pythia.readString("Beams:LHEF = ../../madgraph/output/DiHiggs/Events/run_01/unweighted_events.lhe.gz");
     if (strcmp(process,"4b")==0) pythia.readString("Beams:LHEF = ../../madgraph/output/4b/Events/run_01/unweighted_events.lhe.gz");
 
+    pythia.readString("Next:numberCount = 100");
+
     // Force H->bb decay
     pythia.readString("25:onMode = off");
     pythia.readString("25:onIfAny = 5");
@@ -196,7 +198,7 @@ int main(int argc, char *argv[])
         int n_inel = 0;
         if (mu>0) {
             n_inel = gRandom->Poisson(mu);
-            printf("Overlaying particles from %i pileup interactions!\n", n_inel);
+            // printf("Overlaying particles from %i pileup interactions!\n", n_inel);
         }
         for (int i_pu= 0; i_pu<n_inel; ++i_pu) {
             if (!pythiaPU.next()) continue;

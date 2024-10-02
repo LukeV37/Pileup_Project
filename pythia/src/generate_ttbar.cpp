@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         int n_inel = 0;
         if (mu>0) {
             n_inel = gRandom->Poisson(mu);
-            printf("Overlaying particles from %i pileup interactions!\n", n_inel);
+            // printf("Overlaying particles from %i pileup interactions!\n", n_inel);
         }
         for (int i_pu= 0; i_pu<n_inel; ++i_pu) {
             if (!pythiaPU.next()) continue;
