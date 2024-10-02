@@ -27,7 +27,7 @@ double sbtf(
   static int nbin = 0;
   static double xmin = 0, xmax = 0;
   if (tf==0) {
-    cout << "Preprocessing Liklihood Edge Features" << endl;
+    cout << "Preprocessing Likelihood Edge Features" << endl;
     //cout << "loading tabbed function" << endl;
     ifstream fj("../include/sbfun.json");
     string s;

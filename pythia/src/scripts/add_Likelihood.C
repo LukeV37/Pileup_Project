@@ -38,7 +38,7 @@ void add_Likelihood(TString name)
 
   // loop over fastjet
   int nevfj = treefj->GetEntries();
-  //cout << "fastjet entries: " << nevfj << endl;
+  cout << "fastjet entries: " << nevfj << endl;
   for (int ievfj = 0; ievfj<nevfj; ++ievfj) {
     if (ievfj%1000==0) { cout << ievfj << '\r'; cout.flush(); }
 
