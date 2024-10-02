@@ -30,7 +30,7 @@ define vl~ = ve~ vm~ vt~
 #generate p p > h h [virt=QCD]
 generate p p > b b~ b b~ 
 
-display diagrams
+#display diagrams
 
 # Output processes to MadEvent directory
 output 4b
