@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     char *process = argv[1];
     int mu = atoi(argv[2]);
-    double pTmin_jet = atof(argv[3]);
+    double pTmin_jet = atof(argv[4]);
     
     TString filename = TString("dataset_")+TString(argv[1])+TString("_mu")+TString(argv[2])+TString("_NumEvents")+TString(argv[3])+TString("_MinJetpT")+TString(argv[4])+TString(".root");
 
