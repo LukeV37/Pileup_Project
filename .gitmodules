@@ -1,15 +1,20 @@
 [submodule "software/Pythia-8.312"]
 	path = software/Pythia-8.312
 	url = https://gitlab.com/Pythia8/releases.git
+    ignore = dirty
 [submodule "software/HepMC-2.06.11"]
 	path = software/HepMC-2.06.11
 	url = https://gitlab.cern.ch/hepmc/HepMC.git
+    ignore = dirty
 [submodule "software/Delphes-3.5.0"]
 	path = software/Delphes-3.5.0
 	url = https://github.com/delphes/delphes.git
+    ignore = dirty
 [submodule "software/FastJet-3.4.2"]
 	path = software/FastJet-3.4.2
 	url = https://gitlab.com/fastjet/fastjet.git
+    ignore = dirty
 [submodule "software/MadGraph5-v3.5.5"]
 	path = software/MadGraph5-v3.5.5
 	url = https://github.com/mg5amcnlo/mg5amcnlo.git
+    ignore = dirty
