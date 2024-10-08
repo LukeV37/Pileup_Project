@@ -1,8 +1,3 @@
 .ipynb_checkpoints
 *.pkl
 *.np
-software/Delphes-3.5.0/*
-software/FastJet-3.4.2/*
-software/HepMC-2.06.11/*
-software/MadGraph-v3.5.5/*
-software/Pythia-8.312/*
