@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     } 
 
     if (argc < 4){
-        std::cout << "Error! Must enter 3 arguments" << std::endl;
+        std::cout << "Error! Must enter 4 arguments" << std::endl;
         std::cout << "1: Process {diHiggs|4b}" << std::endl;
         std::cout << "2: Average PU, mu, (int)" << std::endl;
         std::cout << "3: Num Events from MadGraph (int)" << std::endl;
@@ -107,6 +107,12 @@ int main(int argc, char *argv[])
     // Force H->bb decay
     pythia.readString("25:onMode = off");
     pythia.readString("25:onIfAny = 5");
+
+    // Set Vertex Spreading
+    pythia.readString("Beams:allowVertexSpread = on");
+    pythia.readString("Beams:sigmaVertexX = 0.3");
+    pythia.readString("Beams:sigmaVertexY = 0.3");
+    pythia.readString("Beams:sigmaVertexZ = 50.");
 
     // If Pythia fails to initialize, exit with error.
     if (!pythia.init()) return 1;
