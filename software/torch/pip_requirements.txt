@@ -3,5 +3,4 @@ matplotlib
 uproot
 awkward
 numpy
-pickle
 scikit-learn

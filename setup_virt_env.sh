@@ -3,8 +3,8 @@ WORK_DIR=$(pwd)
 cd software
 python3 -m venv torch
 if test -f ./torch/bin/activate; then
-    echo "File exists."
-    source ./torch/bin/activate
+    cd torch
+    source ./bin/activate
     pip install --upgrade pip
     pip install -r pip_requirements.txt
 else
