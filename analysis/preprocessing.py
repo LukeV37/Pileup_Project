@@ -7,7 +7,7 @@ import pickle
 import torch
 import torch.nn.functional as F
 
-
+print("Loading diHiggs sample into memory...")
 with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents10k_MinJetpT25.root:fastjet") as f:
     # jet features
     jet_pt_sig = f["jet_pt"].array()
@@ -27,6 +27,7 @@ with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents10k_MinJetpT25.
     # event label
     label_sig = np.ones(len(jet_pt_sig))
     
+print("Loading 4b sample into memory...")
 with uproot.open("../pythia/output/dataset_4b_mu60_NumEvents10k_MinJetpT25.root:fastjet") as f:
     # jet features
     jet_pt_bkg = f["jet_pt"].array()
@@ -47,6 +48,7 @@ with uproot.open("../pythia/output/dataset_4b_mu60_NumEvents10k_MinJetpT25.root:
     label_bkg = np.zeros(len(jet_pt_sig))
 
 
+print("Joining sig and bkg...")
 # Join signal and background
 jet_pt = ak.concatenate([jet_pt_sig, jet_pt_bkg], axis=0)
 jet_eta = ak.concatenate([jet_eta_sig, jet_eta_bkg], axis=0)
@@ -63,27 +65,31 @@ trk_z0 = ak.concatenate([trk_z0_sig, trk_z0_bkg], axis=0)
 
 labels = ak.concatenate([label_sig, label_bkg], axis=0)
 
+print("Joining jet features...")
 jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_pufr_truth]
 jet_feat_list = [x[:,:,np.newaxis] for x in jet_feat_list]
 jet_feats = ak.concatenate(jet_feat_list, axis=2)
-print("Num Events: ", len(jet_feats))
-print("Num Jets in first event: ", len(jet_feats[0]))
-print("Num Jet Features: ", len(jet_feats[0][0]))
+print("\tNum Events: ", len(jet_feats))
+print("\tNum Jets in first event: ", len(jet_feats[0]))
+print("\tNum Jet Features: ", len(jet_feats[0][0]))
 
+print("Joining track features...")
 trk_feat_list = [trk_pt,trk_eta,trk_phi,trk_q,trk_d0,trk_z0]
 trk_feat_list = [x[:,:,:,np.newaxis] for x in trk_feat_list]
 trk_feats = ak.concatenate(trk_feat_list, axis=3)
-print("Num Events: ", len(trk_feats))
-print("Num Jets in first event: ", len(trk_feats[0]))
-print("Num Tracks in first event first jet: ", len(trk_feats[0][0]))
-print("Num Tracks features: ", len(trk_feats[0][0][0]))
+print("\tNum Events: ", len(trk_feats))
+print("\tNum Jets in first event: ", len(trk_feats[0]))
+print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
+print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
 
+print("Shuffling Events...")
 # Shuffle events
 p = np.random.permutation(len(labels))
 jet_feats = jet_feats[p]
 trk_feats = trk_feats[p]
 labels = labels[p]
 
+print("Applying Cuts...")
 # Apply Jet cuts
 jet_mask = abs(jet_feats[:,:,1])<4
 selected_jets = jet_feats[jet_mask]
@@ -102,6 +108,7 @@ selected_jets = selected_jets[trackless_jets_mask]
 selected_tracks = selected_tracks[trackless_jets_mask]
 
 
+print("Normalizing Jet Features...")
 num_jet_feats = len(selected_jets[0][0])-1
 
 sig = labels==1
@@ -131,22 +138,27 @@ for i in range(num_jet_feats):
     ax2.hist(ak.ravel(norm[bkg]),label='4b',histtype='step',bins=20,range=(mini,maxi))
     ax2.set_title(var_list[i]+" After Normalization")
     ax2.legend()
-    plt.show()
-    print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
-    print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
+    plt.savefig("plots/preprocessing/Normalized_Jet_"+var_list[i]+".png")
+    #plt.show()
+    #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
+    #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
 
+plt.figure()
 plt.title("Jet PUFR")
 plt.hist(ak.ravel(selected_jets[:,:,-1][sig]),histtype='step',label='diHiggs',bins=30,range=(0,1))
 plt.hist(ak.ravel(selected_jets[:,:,-1][bkg]),histtype='step',label='4b',bins=30,range=(0,1))
 plt.yscale('log')
 plt.legend()
-plt.show()
+plt.savefig("plots/preprocessing/Jet_PUFR.png")
+#plt.show()
 
+plt.figure()
 plt.title("Event Label")
 plt.hist(labels[sig],histtype='step',bins=30,label='diHiggs',range=(0,1))
 plt.hist(labels[bkg],histtype='step',bins=30,label='4b',range=(0,1))
 plt.legend()
-plt.show()
+plt.savefig("plots/preprocessing/Event_Label.png")
+#plt.show()
     
 # Append Labels
 norm_list.append(selected_jets[:,:,-1])
@@ -154,7 +166,7 @@ norm_list.append(selected_jets[:,:,-1])
 Norm_list = [x[:,:,np.newaxis] for x in norm_list]
 selected_jets = ak.concatenate(Norm_list, axis=2)
 
-
+print("Normalizing Track Features...")
 num_trk_feats = len(selected_tracks[0][0][0])
 
 sig = labels==1
@@ -186,38 +198,25 @@ for i in range(num_trk_feats):
     ax2.legend()
     if '0' in var_list[i]:
         ax2.set_yscale('log')
-    plt.show()
-    print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
-    print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
+    plt.savefig("plots/preprocessing/Normalized_Track_"+var_list[i]+".png")
+    #plt.show()
+    #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
+    #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
     
 Norm_list = [x[:,:,:,np.newaxis] for x in norm_list]
 selected_tracks = ak.concatenate(Norm_list, axis=3)
 
-
+print("Padding Tracks to common length...")
 all_tracks = ak.flatten(selected_tracks, axis=2)
-
-print("Jet Shape:\t", selected_jets.type)
-print("Trk_Jet  Shape:\t", selected_tracks.type)
-print("Trk_All Shape:\t", all_tracks.type)
-
-
-#%%time
-# Generate List of torch tensors on event by event basis
-# Pad number of tracks per jet 
-
 num_events = len(selected_jets)
-
 Event_Data = []
 Event_Labels = []
-
 for event in range(num_events):
-    if event%5==0:
-        print("Processing: ", event, " / ", num_events, end="\r")
+    if event%1==0:
+        print("\tProcessing: ", event, " / ", num_events, end="\r")
     jets = torch.Tensor(selected_jets[event,:,:])
-    
     num_trks = ak.num(selected_tracks[event], axis=1)
     max_num_trks = ak.max(num_trks)
-
     trk_list = []
     num_jets = len(selected_jets[event])
     for jet in range(num_jets):
@@ -226,15 +225,13 @@ for event in range(num_events):
         tracks = F.pad(tracks,pad)
         trk_list.append(torch.unsqueeze(tracks,dim=0))
     tracks = torch.cat(trk_list,dim=0)
-    
     # Append all data 
     flat_tracks = torch.Tensor(all_tracks[event])
     Event_Data.append((jets,tracks,flat_tracks))
     Event_Labels.append(labels[event])
+print("\tProcessing: ", num_events, " / ", num_events)
 
-print("Processing: ", num_events, " / ", num_events)
-
-
+print("Split dataset into train, val, test...")
 train_split = int(0.7*num_events)  # 70% train
 test_split = int(0.75*num_events)  #  5% val + 25% test
 
@@ -244,11 +241,9 @@ Events_training = Event_List[0:train_split]
 Events_validation = Event_List[train_split:test_split]
 Events_testing = Event_List[test_split:]
 
-print("Processing: ", num_events, " / ", num_events)
-print("Training Events: ", len(Events_training))
-print("Validation Events: ", len(Events_validation))
-print("Testing Events: ", len(Events_testing))
-
+print("\tTraining Events: ", len(Events_training))
+print("\tValidation Events: ", len(Events_validation))
+print("\tTesting Events: ", len(Events_testing))
 
 X_train, y_train = list(zip(*Events_training))
 X_val, y_val = list(zip(*Events_validation))
@@ -256,16 +251,19 @@ X_test, y_test = list(zip(*Events_testing))
 
 data = (X_train, y_train, X_val, y_val, X_test, y_test)
 
-pickle.dump(data, open("data_combined.pkl", "wb"))
+print("Writing dataset to file...")
+pickle.dump(data, open("data/data_combined.pkl", "wb"))
 
-print("X_train Indices Reference:")
-print("\tNum Events: ", len(X_train))
-print("\tNum Tensors: ", len(X_train[0]), "(Jet, trk-jet, flat trk)")
-print("\tNum Jets: ", len(X_train[0][0]))
-print("\tNum Trks per Jet: ", len(X_train[0][1][0]))
-print("\tNum Flat Trks: ", len(X_train[0][2]))
-print("\tNum Jet Feats: ", len(X_train[0][0][0]))
-print("\tNum Trk Feats: ", len(X_train[0][1][0][0]))
-print()
-print("y_train Indices Reference:")
-print("\tNum Events: ", len(y_train))
+debug=False
+if debug:
+    print("X_train Indices Reference:")
+    print("\tNum Events: ", len(X_train))
+    print("\tNum Tensors: ", len(X_train[0]), "(Jet, trk-jet, flat trk)")
+    print("\tNum Jets: ", len(X_train[0][0]))
+    print("\tNum Trks per Jet: ", len(X_train[0][1][0]))
+    print("\tNum Flat Trks: ", len(X_train[0][2]))
+    print("\tNum Jet Feats: ", len(X_train[0][0][0]))
+    print("\tNum Trk Feats: ", len(X_train[0][1][0][0]))
+    print()
+    print("y_train Indices Reference:")
+    print("\tNum Events: ", len(y_train))

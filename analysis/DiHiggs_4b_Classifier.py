@@ -17,9 +17,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 
 
-data = pickle.load( open( "data_combined.pkl", "rb" ) )
+print("Loading Data into memory...")
+data = pickle.load( open( "data/data_combined.pkl", "rb" ) )
 X_train, y_train, X_val, y_val, X_test, y_test = data
-
 
 class Encoder(nn.Module):
     def __init__(self, embed_dim, num_heads):
@@ -117,9 +117,8 @@ class Model(nn.Module):
 
 print("GPU Available: ", torch.cuda.is_available())
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
-print()
-
+#print(device)
+#print()
 
 model = torch.load("../models/results/PUFNN.torch")
 
@@ -163,103 +162,58 @@ print("Processing testing dataset...")
 X_test_pufr, X_test_baseline, X_test_truth, y_test = calc_pred(X_test, y_test) 
 
 
+plt.figure()
 plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
 pufr_pred = ak.flatten(X_test_pufr[:,:,-1])
 pufr_truth = ak.flatten(X_test_truth[:,:,-1])
 plt.hist2d(np.array(pufr_pred),np.array(pufr_truth),bins=100,norm=mcolors.PowerNorm(0.2))
 plt.xlabel('Predicted PU Fraction',loc='right')
 plt.ylabel('True PU Fraction',loc='top')
-plt.show()
+plt.savefig("plots/classifier/Pred_vs_True_PUFR.png")
+#plt.show()
+
+plot=False
+if plot:
+    sig = y_train==1
+    bkg = ~sig
+    var_list = ['Leading','Sub-Leading','Sub-Sub-Leading','Sub-Sub-Sub-Leading']
+    for i, name in enumerate(var_list):
+
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20, 6))
+
+        ax1.set_title(name+'Jet pT')
+        mini=ak.mean(X_train_pufr[:,i,0])-2*ak.std(X_train_pufr[:,i,0])
+        maxi=ak.mean(X_train_pufr[:,i,0])+2*ak.std(X_train_pufr[:,i,0])
+        ax1.hist(X_train_pufr[:,i,0][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
+        ax1.hist(X_train_pufr[:,i,0][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
+        ax1.set_xlabel('pT (GeV)',loc='right')
+        ax1.legend(loc='upper right')
+
+        ax2.set_title(name+'Jet eta')
+        mini=ak.mean(X_train_pufr[:,i,1])-2*ak.std(X_train_pufr[:,i,1])
+        maxi=ak.mean(X_train_pufr[:,i,1])+2*ak.std(X_train_pufr[:,i,1])
+        ax2.hist(X_train_pufr[:,i,1][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
+        ax2.hist(X_train_pufr[:,i,1][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
+        ax2.set_xlabel('eta',loc='right')
+        ax2.legend(loc='upper right')
 
 
-sig = y_train==1
+        ax3.set_title(name+'Jet phi')
+        mini=ak.mean(X_train_pufr[:,i,2])-2*ak.std(X_train_pufr[:,i,2])
+        maxi=ak.mean(X_train_pufr[:,i,2])+2*ak.std(X_train_pufr[:,i,2])
+        ax3.hist(X_train_pufr[:,i,2][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
+        ax3.hist(X_train_pufr[:,i,2][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
+        ax3.set_xlabel('phi',loc='right')
+        ax3.legend(loc='upper right')
 
-plt.title("Jet pT")
-plt.hist(ak.ravel(X_train_pufr[sig][:,:,0]),histtype='step',bins=30,label='diHiggs',range=(-2,2))
-plt.hist(ak.ravel(X_train_pufr[~sig][:,:,0]),histtype='step',bins=30,label='4b',range=(-2,2))
-plt.legend()
-plt.show()
-print("Mean: ", ak.mean(X_train_pufr[:,:,0]))
-print("STD: ", ak.std(X_train_pufr[:,:,0]))
-
-plt.title("Jet eta")
-plt.hist(ak.ravel(X_train_pufr[sig][:,:,1]),histtype='step',bins=30,label='diHiggs',range=(-2,2))
-plt.hist(ak.ravel(X_train_pufr[~sig][:,:,1]),histtype='step',bins=30,label='4b',range=(-2,2))
-plt.legend()
-plt.show()
-print("Mean: ", ak.mean(X_train_pufr[:,:,1]))
-print("STD: ", ak.std(X_train_pufr[:,:,1]))
-
-plt.title("Jet phi")
-plt.hist(ak.ravel(X_train_pufr[sig][:,:,2]),histtype='step',bins=30,label='diHiggs',range=(-2,2))
-plt.hist(ak.ravel(X_train_pufr[~sig][:,:,2]),histtype='step',bins=30,label='4b',range=(-2,2))
-plt.legend()
-plt.show()
-print("Mean: ", ak.mean(X_train_pufr[:,:,2]))
-print("STD: ", ak.std(X_train_pufr[:,:,2]))
-
-plt.title("Jet m")
-plt.hist(ak.ravel(X_train_pufr[sig][:,:,3]),histtype='step',bins=30,label='diHiggs',range=(-2,2))
-plt.hist(ak.ravel(X_train_pufr[~sig][:,:,3]),histtype='step',bins=30,label='4b',range=(-2,2))
-plt.legend()
-plt.show()
-print("Mean: ", ak.mean(X_train_pufr[:,:,3]))
-print("STD: ", ak.std(X_train_pufr[:,:,3]))
-
-plt.title("Jet pufr")
-plt.hist(ak.ravel(X_train_pufr[sig][:,:,4]),histtype='step',bins=30,label='diHiggs',range=(0,1))
-plt.hist(ak.ravel(X_train_pufr[~sig][:,:,4]),histtype='step',bins=30,label='4b',range=(0,1))
-plt.legend()
-plt.yscale('log')
-plt.show()
-
-plt.title("Jet Label")
-plt.hist(ak.ravel(y_train[sig]),histtype='step',bins=30,label='diHiggs',range=(0,1))
-plt.hist(ak.ravel(y_train[~sig]),histtype='step',bins=30,label='4b',range=(0,1))
-plt.legend()
-plt.show()
-
-
-sig = y_train==1
-bkg = ~sig
-var_list = ['Leading','Sub-Leading','Sub-Sub-Leading','Sub-Sub-Sub-Leading']
-for i, name in enumerate(var_list):
-
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20, 6))
-
-    ax1.set_title(name+'Jet pT')
-    mini=ak.mean(X_train_pufr[:,i,0])-2*ak.std(X_train_pufr[:,i,0])
-    maxi=ak.mean(X_train_pufr[:,i,0])+2*ak.std(X_train_pufr[:,i,0])
-    ax1.hist(X_train_pufr[:,i,0][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
-    ax1.hist(X_train_pufr[:,i,0][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
-    ax1.set_xlabel('pT (GeV)',loc='right')
-    ax1.legend(loc='upper right')
-
-    ax2.set_title(name+'Jet eta')
-    mini=ak.mean(X_train_pufr[:,i,1])-2*ak.std(X_train_pufr[:,i,1])
-    maxi=ak.mean(X_train_pufr[:,i,1])+2*ak.std(X_train_pufr[:,i,1])
-    ax2.hist(X_train_pufr[:,i,1][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
-    ax2.hist(X_train_pufr[:,i,1][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
-    ax2.set_xlabel('eta',loc='right')
-    ax2.legend(loc='upper right')
-
-
-    ax3.set_title(name+'Jet phi')
-    mini=ak.mean(X_train_pufr[:,i,2])-2*ak.std(X_train_pufr[:,i,2])
-    maxi=ak.mean(X_train_pufr[:,i,2])+2*ak.std(X_train_pufr[:,i,2])
-    ax3.hist(X_train_pufr[:,i,2][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
-    ax3.hist(X_train_pufr[:,i,2][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
-    ax3.set_xlabel('phi',loc='right')
-    ax3.legend(loc='upper right')
-
-    ax4.set_title(name+'Jet Mass')
-    mini=ak.mean(X_train_pufr[:,i,3])-2*ak.std(X_train_pufr[:,i,3])
-    maxi=ak.mean(X_train_pufr[:,i,3])+2*ak.std(X_train_pufr[:,i,3])
-    ax4.hist(X_train_pufr[:,i,3][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
-    ax4.hist(X_train_pufr[:,i,3][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
-    ax4.set_xlabel('Mass (GeV)',loc='right')
-    ax4.legend(loc='upper right')
-    plt.show()
+        ax4.set_title(name+'Jet Mass')
+        mini=ak.mean(X_train_pufr[:,i,3])-2*ak.std(X_train_pufr[:,i,3])
+        maxi=ak.mean(X_train_pufr[:,i,3])+2*ak.std(X_train_pufr[:,i,3])
+        ax4.hist(X_train_pufr[:,i,3][sig],histtype='step',label='DiHiggs',bins=20,range=(mini,maxi))
+        ax4.hist(X_train_pufr[:,i,3][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
+        ax4.set_xlabel('Mass (GeV)',loc='right')
+        ax4.legend(loc='upper right')
+        plt.show()
 
 
 # Convert to torch.Tensor()
@@ -370,11 +324,6 @@ def train(model, optimizer, data, epochs=20):
             
     return history
 
-
-print("GPU Available: ", torch.cuda.is_available())
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
-
 # Use BinaryCrossEntropy for binary classification
 loss_fn = nn.BCELoss()
 
@@ -386,11 +335,13 @@ PUFR = Model2(5,32,1).to(device)
 optimizer_pufr = optim.AdamW(PUFR.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_pufr, y_train, X_val_pufr, y_val]
 PUFR_history = train(PUFR, optimizer_pufr, data, epochs=Epochs)
+
+plt.figure()
 plt.plot(PUFR_history['train_loss'],label='train')
 plt.plot(PUFR_history['test_loss'],label='validation')
 plt.title("Pred pufr Loss")
 plt.legend()
-plt.show()
+plt.savefig("plots/classifier/Pred_PUFR_Loss_Curve.png")
 print()
 
 # Train model with pt,eta,phi,m,truth
@@ -399,11 +350,13 @@ Truth = Model2(5,32,1).to(device)
 optimizer_truth = optim.AdamW(Truth.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_truth, y_train, X_val_truth, y_val]
 Truth_history = train(Truth, optimizer_truth, data, epochs=Epochs)
+
+plt.figure()
 plt.plot(Truth_history['train_loss'],label='train')
 plt.plot(Truth_history['test_loss'],label='validation')
 plt.title("Truth pufr Loss")
 plt.legend()
-plt.show()
+plt.savefig("plots/classifier/Truth_PUFR_Loss_Curve.png")
 print()
 
 # Train model with pt,eta,phi,m
@@ -412,52 +365,14 @@ Baseline = Model2(4,32,1).to(device)
 optimizer_baseline = optim.AdamW(Baseline.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_baseline, y_train, X_val_baseline, y_val]
 Baseline_history = train(Baseline, optimizer_baseline, data, epochs=Epochs)
+
+plt.figure()
 plt.plot(Baseline_history['train_loss'],label='train')
 plt.plot(Baseline_history['test_loss'],label='validation')
 plt.title("Baseline")
 plt.legend()
-plt.show()
+plt.savefig("plots/classifier/Baseline_Loss_Curve.png")
 print()
-
-train_more=False
-if train_more:
-    Epochs = 30
-
-    # Train model with pt,eta,phi,m,pufr
-    print("Training with PUFR")
-    data = [X_train_pufr, y_train, X_val_pufr, y_val]
-    PUFR_history2 = train(PUFR, optimizer_pufr, data, epochs=Epochs)
-    PUFR_history['train_loss'] = np.concatenate([PUFR_history['train_loss'],PUFR_history2['train_loss']], axis=0)
-    PUFR_history['test_loss'] = np.concatenate([PUFR_history['test_loss'],PUFR_history2['test_loss']], axis=0)
-    plt.plot(PUFR_history['train_loss'][2:],label='train')
-    plt.plot(PUFR_history['test_loss'][2:],label='validation')
-    plt.title("With pufr Loss")
-    plt.legend()
-    plt.show()
-
-    # Train model with pt,eta,phi,m,pufr
-    print("Training with Truth PUFR")
-    data = [X_train_truth, y_train, X_val_truth, y_val]
-    Truth_history2 = train(Truth, optimizer_truth, data, epochs=Epochs)
-    Truth_history['train_loss'] = np.concatenate([Truth_history['train_loss'],Truth_history2['train_loss']], axis=0)
-    Truth_history['test_loss'] = np.concatenate([Truth_history['test_loss'],Truth_history2['test_loss']], axis=0)
-    plt.plot(Truth_history['train_loss'][2:],label='train')
-    plt.plot(Truth_history['test_loss'][2:],label='validation')
-    plt.title("With Truth pufr Loss")
-    plt.legend()
-    plt.show()
-
-    print("Training Baseline")
-    data = [X_train_baseline, y_train, X_val_baseline, y_val]
-    Baseline_history2 = train(Baseline, optimizer_baseline, data, epochs=Epochs)
-    Baseline_history['train_loss'] = np.concatenate([Baseline_history['train_loss'],Baseline_history2['train_loss']], axis=0)
-    Baseline_history['test_loss'] = np.concatenate([Baseline_history['test_loss'],Baseline_history2['test_loss']], axis=0)
-    plt.plot(Baseline_history['train_loss'][2:],label='train')
-    plt.plot(Baseline_history['test_loss'][2:],label='validation')
-    plt.title("Baseline")
-    plt.legend()
-    plt.show()
-
 
 def ATLAS_roc(y_true, y_pred):
     sig = (y_true==1)
@@ -472,10 +387,6 @@ def ATLAS_roc(y_true, y_pred):
         sig_eff.append(((y_pred[sig] > threshold).sum() / y_true[sig].shape[0]))
         bkg_eff.append(1-((y_pred[bkg] < threshold).sum() / y_true[bkg].shape[0]))
 
-        #print("Theshold: ", threshold)
-        #print("Signal Efficiency: ", sig_eff[-1])
-        #print("Background Efficiency: ", bkg_eff[-1],"\n")
-        
     bkg_rej = [1/x for x in bkg_eff]
     return np.array(sig_eff), np.array(bkg_rej), thresholds
 
@@ -545,7 +456,12 @@ ax1.set_ylim(1,6)
 ax1.set_xlim(0.6,1)
 ax2.set_xlim(0.6,1)
 ax2.set_ylim(0.9,1.3)
-plt.show()
+plt.savefig("plots/classifier/ATLAS_ROC.png")
+
+with open("plots/classifier/metrics.txt", "w") as f:
+    print("Pred PUFR\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1, file=f)
+    print("Truth PUFR\t","Binary Accuracy: ", BA2, "\tF1 Score: ", f12, "\tAUC: ", AUC2, file=f)
+    print("Baseline\t","Binary Accuracy: ", BA3, "\tF1 Score: ", f13, "\tAUC: ", AUC3, file=f)
 
 print("Pred PUFR\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1)
 print("")
@@ -557,6 +473,7 @@ print("")
 
 mask = y_test==1
 
+plt.figure()
 plt.title("Model Score")
 
 plt.hist(pufr_pred[mask],color='r',histtype='step',label='DiHiggs (pred pufr)',bins=30,range=(0,1))
@@ -568,6 +485,6 @@ plt.hist(pufr_pred[~mask],color='b',histtype='step',label='4b (pred pufr)',bins=
 plt.hist(baseline_pred[mask],color='r',histtype='step',label='DiHiggs (wo pufr)',bins=30,range=(0,1),linestyle='--')
 plt.hist(baseline_pred[~mask],color='b',histtype='step',label='4b (wo pufr)',bins=30,range=(0,1),linestyle='--')
 
-plt.yscale('log')
+#plt.yscale('log')
 plt.legend()
-plt.show()
+plt.savefig("plots/classifier/Model_Score.png")
