@@ -4,11 +4,14 @@ cd output
 
 # Edit Run Card
 Beam_Energy=7000.0
+num_Events=50000
+
+# Apply changes to run card
 sed -i "s/6500.0/$Beam_Energy/" DiHiggs/Cards/run_card.dat
-num_Events=10000
 sed -i "s/\(.*\)= nevents\(.*\)/ $num_Events = nevents\2/" DiHiggs/Cards/run_card.dat
 
 # Generate LHE File
 DiHiggs/bin/generate_events
 
+# Clean up workspace
 rm py.py
