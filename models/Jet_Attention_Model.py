@@ -18,7 +18,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 print("Loading Data into memory...")
-data = pickle.load( open( "datasets/data_ttbar_MG.pkl", "rb" ) )
+data = pickle.load( open( "data/data_diHiggs.pkl", "rb" ) )
 X_train, y_train, X_val, y_val, X_test, y_test = data
 
 class Encoder(nn.Module):
@@ -144,7 +144,7 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, epochs=40):
     num_train = len(X_train)
     num_val = len(X_val)
     
-    step_size=25
+    step_size=15
     gamma=0.1
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
     for e in range(epochs):
@@ -203,13 +203,15 @@ optimizer = optim.AdamW(model.parameters(), lr=0.0001)
 
 loss_fn = nn.MSELoss()
 
-combined_history = train(model, optimizer, X_train, y_train, X_val, y_val,epochs=60)
+combined_history = train(model, optimizer, X_train, y_train, X_val, y_val,epochs=40)
 
+plt.figure()
 plt.plot(combined_history[:,0], label="Train")
 plt.plot(combined_history[:,1], label="Val")
 plt.title('Loss')
 plt.legend()
-plt.show()
+plt.savefig("plots/regression/Loss_Curve.png")
+#plt.show()
 
 
 # ### Evaluate Model
@@ -244,19 +246,23 @@ print()
 print("Test MAE:\t", mean_absolute_error(true_labels, predicted_labels))
 print("Test RMSE:\t", root_mean_squared_error(true_labels, predicted_labels))
 
+plt.figure()
 plt.hist(true_labels,histtype='step',color='r',label='True Distribution',bins=50,range=(0,1))
 plt.hist(predicted_labels,histtype='step',color='b',label='Predicted Distribution',bins=50,range=(0,1))
 plt.title("Predicted Ouput Distribution using Attention Model (\u03BC=60)")
 plt.legend()
 plt.yscale('log')
 plt.xlabel('PU Fraction',loc='right')
-plt.show()
+plt.savefig("plots/regression/pred_1d.png")
+#plt.show()
 
+plt.figure()
 plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
 plt.hist2d(predicted_labels,true_labels, bins=100,norm=mcolors.PowerNorm(0.2))
 plt.xlabel('Predicted PU Fraction',loc='right')
 plt.ylabel('True PU Fraction',loc='top')
-plt.show()
+plt.savefig("plots/regression/pred_2d.png")
+#plt.show()
 
 
 def ATLAS_roc(y_true, y_pred):
@@ -323,14 +329,13 @@ ax1.grid(which='both')
 ax2.grid(which='both')
 ax1.set_xlim(0.3,1)
 ax2.set_xlim(0.3,1)
-plt.show()
+plt.savefig("plots/regression/ATLAS_ROC.png")
+#plt.show()
 
 print("PUFNN\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11)
 print("")
 
-
-
-file_names = ["PUFNN_Results.np"]
+file_names = ["results/PUFNN_Results.np"]
 
 results1 = np.concatenate((x1_v2[np.newaxis],y1_v2[np.newaxis],th1_v2[np.newaxis]),axis=0)
 
@@ -340,12 +345,11 @@ for i, file in enumerate(file_names):
     with open(file, 'wb') as f:
         np.save(f, results[i])
 
-
 #print(model)
 print("Trainable Parameters :", np.sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
-torch.save(model,"PUFNN.torch")
+torch.save(model,"results/PUFNN_diHiggs.torch")
 
 
 #model = torch.load("PUFNN.torch")
