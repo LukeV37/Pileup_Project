@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [ -z "$4" ]; then
-    echo "Must enter 3 agruments"
+    echo "Must enter 4 agruments"
     echo "1: Process {diHiggs|4b}"
     echo "2: Average PU, mu, (int)"
-    echo "3: Num Events from MadGraph (int)"
+    echo "3: String Modifier (Or NumEvents from MG)"
     echo "4: MinJetpT (float)"
     exit 1
 fi
