@@ -44,7 +44,7 @@ print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
 
 print("Shuffling Events...")
 # Shuffle events
-p = np.random.permutation(len(labels))
+p = np.random.permutation(len(jet_feats))
 jet_feats = jet_feats[p]
 trk_feats = trk_feats[p]
 
