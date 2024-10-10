@@ -46,7 +46,7 @@ class Model(nn.Module):
         super(Model, self).__init__()   
         
         self.embed_dim = 256
-        self.num_heads = 4
+        self.num_heads = 8
         self.num_jet_feats = 4
         self.num_trk_feats = 6
         
