@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 
 print("Loading diHiggs sample into memory...")
-with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents10k_MinJetpT25.root:fastjet") as f:
+with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents50k_MinJetpT25.root:fastjet") as f:
     # jet features
     jet_pt_sig = f["jet_pt"].array()
     jet_eta_sig = f["jet_eta"].array()
@@ -28,7 +28,7 @@ with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents10k_MinJetpT25.
     label_sig = np.ones(len(jet_pt_sig))
     
 print("Loading 4b sample into memory...")
-with uproot.open("../pythia/output/dataset_4b_mu60_NumEvents10k_MinJetpT25.root:fastjet") as f:
+with uproot.open("../pythia/output/dataset_4b_mu60_NumEvents50k_MinJetpT25.root:fastjet") as f:
     # jet features
     jet_pt_bkg = f["jet_pt"].array()
     jet_eta_bkg = f["jet_eta"].array()

@@ -18,7 +18,7 @@ from sklearn.metrics import f1_score
 
 
 print("Loading Data into memory...")
-data = pickle.load( open( "data/data_combined.pkl", "rb" ) )
+data = pickle.load( open( "data/data_combined_100k.pkl", "rb" ) )
 X_train, y_train, X_val, y_val, X_test, y_test = data
 
 class Encoder(nn.Module):
@@ -120,7 +120,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #print(device)
 #print()
 
-model = torch.load("../models/results/PUFNN.torch")
+model = torch.load("../models/results/PUFNN_diHiggs_50k.torch")
 
 PUFrANN = model.to(device)
 
@@ -288,7 +288,7 @@ def train(model, optimizer, data, epochs=20):
         
     history = {'train_loss':[],'test_loss':[]}
    
-    step_size=30
+    step_size=15
     gamma=0.1
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
     for e in range(epochs):     
@@ -327,11 +327,11 @@ def train(model, optimizer, data, epochs=20):
 # Use BinaryCrossEntropy for binary classification
 loss_fn = nn.BCELoss()
 
-Epochs = 60
+Epochs = 30
 
 # Train model with pt,eta,phi,m,pufr
 print("Training with Pred PUFR")
-PUFR = Model2(5,32,1).to(device)
+PUFR = Model2(5,128,1).to(device)
 optimizer_pufr = optim.AdamW(PUFR.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_pufr, y_train, X_val_pufr, y_val]
 PUFR_history = train(PUFR, optimizer_pufr, data, epochs=Epochs)
@@ -346,7 +346,7 @@ print()
 
 # Train model with pt,eta,phi,m,truth
 print("Training with Truth")
-Truth = Model2(5,32,1).to(device)
+Truth = Model2(5,128,1).to(device)
 optimizer_truth = optim.AdamW(Truth.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_truth, y_train, X_val_truth, y_val]
 Truth_history = train(Truth, optimizer_truth, data, epochs=Epochs)
@@ -361,7 +361,7 @@ print()
 
 # Train model with pt,eta,phi,m
 print("Training Baseline")
-Baseline = Model2(4,32,1).to(device)
+Baseline = Model2(4,128,1).to(device)
 optimizer_baseline = optim.AdamW(Baseline.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_baseline, y_train, X_val_baseline, y_val]
 Baseline_history = train(Baseline, optimizer_baseline, data, epochs=Epochs)
