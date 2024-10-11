@@ -24,5 +24,5 @@ make
 make all
 ./add_Likelihood.exe $name
 make clean
-root -q -l -b add_true_EMfrac.cpp
+root -q -l -b add_true_EMfrac.cpp\(\""$name"\"\)
 cd ../..
