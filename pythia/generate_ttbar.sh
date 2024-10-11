@@ -18,7 +18,7 @@ cd ..
 name="dataset_$3_mu$2_NumEvents$1_MinJetpT$4.root"
 echo "Processing: $name"
 cd src/scripts
-root -q -l -b add_JVT.C\(\""$name"\"\)
-root -q -l -b add_true_pufr.C\(\""$name"\"\)
-root -q -l -b add_ttbar_match.C\(\""$name"\"\)
+root -q -l -b add_JVT.cpp\(\""$name"\"\)
+root -q -l -b add_true_pufr.cpp\(\""$name"\"\)
+root -q -l -b add_ttbar_match.cpp\(\""$name"\"\)
 cd ../..

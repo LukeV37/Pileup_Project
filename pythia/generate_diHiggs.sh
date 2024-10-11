@@ -18,10 +18,11 @@ cd ..
 name="dataset_$1_mu$2_NumEvents$3_MinJetpT$4.root"
 echo "Processing: $name"
 cd src/scripts
-root -q -l -b add_JVT.C\(\""$name"\"\)
-root -q -l -b add_true_pufr.C\(\""$name"\"\)
+root -q -l -b add_JVT.cpp\(\""$name"\"\)
+root -q -l -b add_true_pufr.cpp\(\""$name"\"\)
 make
 make all
 ./add_Likelihood.exe $name
 make clean
+root -q -l -b add_true_EMfrac.cpp
 cd ../..
