@@ -213,7 +213,7 @@ if plot:
         ax4.hist(X_train_pufr[:,i,3][bkg],histtype='step',label='4b',bins=20,range=(mini,maxi))
         ax4.set_xlabel('Mass (GeV)',loc='right')
         ax4.legend(loc='upper right')
-        plt.show()
+        #plt.show()
 
 
 # Convert to torch.Tensor()
