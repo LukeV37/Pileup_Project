@@ -2,3 +2,10 @@
 *.pkl
 *.np
 *.log
+*dict.cpp
+*dict.o
+*rdict.pcm
+*.o
+run_dihiggs
+run_ttbar
+run_hepmc
