@@ -10,7 +10,7 @@ using std::endl;
 
 #include <cmath>
 
-#include "../include/sbtf.C"
+#include "../include/sbtf.cpp"
 
 void add_Likelihood(TString name)
 {
