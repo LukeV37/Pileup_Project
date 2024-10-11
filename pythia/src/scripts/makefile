@@ -1,27 +1,27 @@
 SOFTWARE_PATH=../../software/
 
-CPP=g++
+cppPP=g++
 LD=g++
-SPECIALFLAGS=-O2
-ROOTCFLAGS=$(shell root-config --cflags)
+SPEcppIALFLAGS=-O2
+ROOTcppFLAGS=$(shell root-config --cflags)
 ROOTLIBS=$(shell root-config --libs)
 
-CFLAGS = $(SPECIALFLAGS) -I.
+cppFLAGS = $(SPEcppIALFLAGS) -I.
 LFLAGS = -L.
 
-RCXX=$(CFLAGS) $(ROOTCFLAGS)
+RcppXX=$(cppFLAGS) $(ROOTcppFLAGS)
 RLXX=$(LFLAGS) $(ROOTLIBS)
 
-SRC=add_Likelihood.C add_Likelihood_dict.C
+SRcpp=add_Likelihood.cpp add_Likelihood_dict.cpp
 
-add_Likelihood_dict.C: ../include/LinkDef.h
-	@rootcling add_Likelihood_dict.C ../include/LinkDef.h
+add_Likelihood_dict.cpp: ../include/LinkDef.h
+	@rootcling add_Likelihood_dict.cpp ../include/LinkDef.h
 
-%.o: %.C
-	@$(CPP) $(RCXX) -c $< 
+%.o: %.cpp
+	@$(cppPP) $(RcppXX) -c $< 
 
-all: $(SRC:.C=.o)
-	@$(LD) $(SRC:.C=.o) $(RLXX) -o add_Likelihood.exe
+all: $(SRcpp:.cpp=.o)
+	@$(LD) $(SRcpp:.cpp=.o) $(RLXX) -o add_Likelihood.exe
 
 clean:
 	@rm -f *~ add*_dict* *.o *.exe
