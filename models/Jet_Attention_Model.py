@@ -17,8 +17,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+in_data = "data/data_diHiggs_20k.pkl"
+out_path = "plots/regression/"
+
 print("Loading Data into memory...")
-data = pickle.load( open( "data/data_diHiggs.pkl", "rb" ) )
+data = pickle.load( open( in_data , "rb" ) )
 X_train, y_train, X_val, y_val, X_test, y_test = data
 
 class Encoder(nn.Module):
@@ -210,7 +213,7 @@ plt.plot(combined_history[:,0], label="Train")
 plt.plot(combined_history[:,1], label="Val")
 plt.title('Loss')
 plt.legend()
-plt.savefig("plots/regression/Loss_Curve.png")
+plt.savefig(out_path+"Loss_Curve.png")
 #plt.show()
 
 
@@ -253,7 +256,7 @@ plt.title("Predicted Ouput Distribution using Attention Model (\u03BC=60)")
 plt.legend()
 plt.yscale('log')
 plt.xlabel('PU Fraction',loc='right')
-plt.savefig("plots/regression/pred_1d.png")
+plt.savefig(out_path+"pred_1d.png")
 #plt.show()
 
 plt.figure()
@@ -261,7 +264,7 @@ plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
 plt.hist2d(predicted_labels,true_labels, bins=100,norm=mcolors.PowerNorm(0.2))
 plt.xlabel('Predicted PU Fraction',loc='right')
 plt.ylabel('True PU Fraction',loc='top')
-plt.savefig("plots/regression/pred_2d.png")
+plt.savefig(out_path+"pred_2d.png")
 #plt.show()
 
 
@@ -329,7 +332,7 @@ ax1.grid(which='both')
 ax2.grid(which='both')
 ax1.set_xlim(0.3,1)
 ax2.set_xlim(0.3,1)
-plt.savefig("plots/regression/ATLAS_ROC.png")
+plt.savefig(out_path+"ATLAS_ROC.png")
 #plt.show()
 
 print("PUFNN\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11)
