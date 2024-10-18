@@ -7,6 +7,9 @@ import pickle
 import torch
 import torch.nn.functional as F
 
+in_sample = "dataset_diHiggs_mu60_NumEvents20k_MinJetpT25.root"
+out_sample = "data/data_diHiggs_20k.pkl"
+
 # Uproot opens a ROOT file. There is a TTree (data structure) inside named fastjet.
 # The fastjet TTree has branches that can be accessed by strings. E.g. "jet_pt"
 # Uproot reads the branch and converts the branch to an awkward array stored in memory
@@ -14,9 +17,8 @@ import torch.nn.functional as F
 # Awkward arrays are great to perform vectorized operations!
 # However loading the entire dataset into memory can cause issues with hardware limitations...
 # Loading 100k mu=60 events into memory takes 120GB of RAM!
-
 print("Loading diHiggs sample into memory...")
-with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents50k_MinJetpT25.root:fastjet") as f:
+with uproot.open("../pythia/output/"+in_sample+":fastjet") as f:
     jet_pt = f["jet_pt"].array()
     jet_eta = f["jet_eta"].array()
     jet_phi = f["jet_phi"].array()
@@ -32,9 +34,10 @@ with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents50k_MinJetpT25.
     trk_label = f["trk_jet_label"].array()
     jet_trk_IDX = f["jet_track_index"].array()
     jet_pufr_truth = f["jet_pufr_truth"].array()
+    jet_label = f["jet_true_Efrac"].array()
 
 print("Joining jet features...")
-jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_pufr_truth]
+jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_label]
 jet_feat_list = [x[:,:,np.newaxis] for x in jet_feat_list]
 jet_feats = ak.concatenate(jet_feat_list, axis=2)
 print("\tNum Events: ", len(jet_feats))
@@ -110,12 +113,12 @@ for i in range(num_jet_feats):
     #print("STD Before: ", std, "\t\t STD After: ", ak.std(norm))
 
 plt.figure()
-plt.title("Jet PUFR")
+plt.title("Jet Label")
 plt.hist(ak.ravel(selected_jets[:,:,-1][sig]),histtype='step',label='HS',bins=30,range=(0,1))
 plt.hist(ak.ravel(selected_jets[:,:,-1][bkg]),histtype='step',label='PU',bins=30,range=(0,1))
 plt.yscale('log')
 plt.legend()
-plt.savefig("plots/preprocessing/Jet_PUFR.png")
+plt.savefig("plots/preprocessing/Jet_Label.png")
 #plt.show()    
     
 # Append Labels
@@ -213,7 +216,7 @@ X_test, y_test = list(zip(*Events_testing))
 
 data = (X_train, y_train, X_val, y_val, X_test, y_test)
 
-pickle.dump(data, open("data/data_diHiggs.pkl", "wb"))
+pickle.dump(data, open( out_sample , "wb"))
 
 debug=False
 if debug:
