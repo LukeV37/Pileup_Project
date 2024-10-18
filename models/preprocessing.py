@@ -3,12 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import awkward as ak
 import pickle
+import sys
 
 import torch
 import torch.nn.functional as F
 
 in_sample = "dataset_diHiggs_mu60_NumEvents20k_MinJetpT25.root"
-out_sample = "data/data_diHiggs_20k.pkl"
+out_sample = "data/data_diHiggs_20k_Mfrac.pkl"
+out_dir = str(sys.argv[1])
 
 # Uproot opens a ROOT file. There is a TTree (data structure) inside named fastjet.
 # The fastjet TTree has branches that can be accessed by strings. E.g. "jet_pt"
@@ -34,7 +36,7 @@ with uproot.open("../pythia/output/"+in_sample+":fastjet") as f:
     trk_label = f["trk_jet_label"].array()
     jet_trk_IDX = f["jet_track_index"].array()
     jet_pufr_truth = f["jet_pufr_truth"].array()
-    jet_label = f["jet_true_Efrac"].array()
+    jet_label = f["jet_true_Mfrac"].array()
 
 print("Joining jet features...")
 jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_label]
@@ -107,7 +109,7 @@ for i in range(num_jet_feats):
     ax2.hist(ak.ravel(norm[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
     ax2.set_title(var_list[i]+" After Normalization")
     ax2.legend()
-    plt.savefig("plots/preprocessing/Normalized_Jet_"+var_list[i]+".png")
+    plt.savefig(out_dir+"Normalized_Jet_"+var_list[i]+".png")
     #plt.show()
     #print("Mean Before: ", mean, "\t\t Mean After: ", ak.mean(norm))
     #print("STD Before: ", std, "\t\t STD After: ", ak.std(norm))
@@ -118,7 +120,7 @@ plt.hist(ak.ravel(selected_jets[:,:,-1][sig]),histtype='step',label='HS',bins=30
 plt.hist(ak.ravel(selected_jets[:,:,-1][bkg]),histtype='step',label='PU',bins=30,range=(0,1))
 plt.yscale('log')
 plt.legend()
-plt.savefig("plots/preprocessing/Jet_Label.png")
+plt.savefig(out_dir+"Jet_Label.png")
 #plt.show()    
     
 # Append Labels
@@ -158,7 +160,7 @@ for i in range(num_trk_feats):
     ax2.legend()
     if '0' in var_list[i]:
         ax2.set_yscale('log')
-    plt.savefig("plots/preprocessing/Normalized_Track_"+var_list[i]+".png")
+    plt.savefig(out_dir+"Normalized_Track_"+var_list[i]+".png")
     #plt.show()
     #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
     #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))

@@ -17,8 +17,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-in_data = "data/data_diHiggs_20k.pkl"
-out_path = "plots/regression/"
+in_data = "data/data_diHiggs_20k_Mfrac.pkl"
+out_path = "plots/Mfrac_regression/"
 
 print("Loading Data into memory...")
 data = pickle.load( open( in_data , "rb" ) )
@@ -338,7 +338,7 @@ plt.savefig(out_path+"ATLAS_ROC.png")
 print("PUFNN\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11)
 print("")
 
-file_names = ["results/PUFNN_Results.np"]
+file_names = ["results/MfracNN_Results.np"]
 
 results1 = np.concatenate((x1_v2[np.newaxis],y1_v2[np.newaxis],th1_v2[np.newaxis]),axis=0)
 
@@ -352,7 +352,7 @@ for i, file in enumerate(file_names):
 print("Trainable Parameters :", np.sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
-torch.save(model,"results/PUFNN_diHiggs.torch")
+torch.save(model,"results/MfracNN_diHiggs_20k.torch")
 
 
 #model = torch.load("PUFNN.torch")
