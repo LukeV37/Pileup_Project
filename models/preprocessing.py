@@ -10,6 +10,13 @@ import torch.nn.functional as F
 in_sample = "dataset_diHiggs_mu60_NumEvents20k_MinJetpT25.root"
 out_sample = "data/data_diHiggs_20k.pkl"
 
+# Uproot opens a ROOT file. There is a TTree (data structure) inside named fastjet.
+# The fastjet TTree has branches that can be accessed by strings. E.g. "jet_pt"
+# Uproot reads the branch and converts the branch to an awkward array stored in memory
+# An awkward array is a jagged numpy-like array specifically developed for High Energy Physics purposes
+# Awkward arrays are great to perform vectorized operations!
+# However loading the entire dataset into memory can cause issues with hardware limitations...
+# Loading 100k mu=60 events into memory takes 120GB of RAM!
 print("Loading diHiggs sample into memory...")
 with uproot.open("../pythia/output/"+in_sample+":fastjet") as f:
     jet_pt = f["jet_pt"].array()
