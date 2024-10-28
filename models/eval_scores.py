@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import awkward as ak
 import pickle
 
-import ROOT
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,7 +11,6 @@ import torch.optim as optim
 
 path_to_Efrac_model="./results/EfracNN_diHiggs_20k.torch"
 path_to_Mfrac_model="./results/MfracNN_diHiggs_20k.torch"
-
 
 print("Loading sample into memory...")
 with uproot.open("/mnt/shared/lvaughan/Pileup_ntuples/dataset_mu60_H1A3_10k_true_EMfrac.root:fastjet") as f:
@@ -100,9 +97,8 @@ for event in range(num_events):
     
     trk_feats.append(jet_trk_feats)
     
-trk_feats = ak.Array(trk_feats)
-
 print("\tProcessing: ", num_events, " / ", num_events)
+trk_feats = ak.Array(trk_feats)
 print("\tNum Events: ", len(trk_feats))
 print("\tNum Jets in first event: ", len(trk_feats[0]))
 print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
