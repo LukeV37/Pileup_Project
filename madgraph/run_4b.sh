@@ -4,7 +4,7 @@ cd output
 
 # Edit Run Card
 Beam_Energy=7000.0
-num_Events=50000
+num_Events=20000
 min_ptb_filter=60 #GeV
 
 # Apply changes to run card
