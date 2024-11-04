@@ -339,7 +339,6 @@ print(device)
 EfracNN = torch.load(path_to_Efrac_model).to(device)
 MfracNN = torch.load(path_to_Mfrac_model).to(device)
 
-
 Efrac = ak.ones_like(jet_pt) * -1
 Efrac = Efrac.to_list()
 
