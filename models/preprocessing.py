@@ -8,9 +8,10 @@ import sys
 import torch
 import torch.nn.functional as F
 
-in_sample = "dataset_diHiggs_mu60_NumEvents20k_MinJetpT25.root"
-out_sample = "data/data_diHiggs_20k_Mfrac.pkl"
-out_dir = str(sys.argv[1])
+run_type = str(sys.argv[1]) # Efrac of Mfrac
+in_sample = str(sys.argv[2]) # e.g. ../pythia/output/<file>.root
+out_sample = str(sys.argv[3]) # e.g. data/<file>.pkl
+out_dir = str(sys.argv[4]) # e.g plots/<Dir Name>
 
 # Uproot opens a ROOT file. There is a TTree (data structure) inside named fastjet.
 # The fastjet TTree has branches that can be accessed by strings. E.g. "jet_pt"
@@ -20,7 +21,7 @@ out_dir = str(sys.argv[1])
 # However loading the entire dataset into memory can cause issues with hardware limitations...
 # Loading 100k mu=60 events into memory takes 120GB of RAM!
 print("Loading diHiggs sample into memory...")
-with uproot.open("../pythia/output/"+in_sample+":fastjet") as f:
+with uproot.open(in_sample+":fastjet") as f:
     jet_pt = f["jet_pt"].array()
     jet_eta = f["jet_eta"].array()
     jet_phi = f["jet_phi"].array()
@@ -36,7 +37,7 @@ with uproot.open("../pythia/output/"+in_sample+":fastjet") as f:
     trk_label = f["trk_jet_label"].array()
     jet_trk_IDX = f["jet_track_index"].array()
     jet_pufr_truth = f["jet_pufr_truth"].array()
-    jet_label = f["jet_true_Mfrac"].array()
+    jet_label = f["jet_true_"+run_type].array()
 
 print("Joining jet features...")
 jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_label]
@@ -82,7 +83,7 @@ selected_tracks = selected_tracks[trackless_jets_mask]
 print("Normalizing Jet Features...")
 num_jet_feats = len(selected_jets[0][0])-1
 
-sig = selected_jets[:,:,-1]<0.7
+sig = selected_jets[:,:,-1]>0.5
 bkg = ~sig
 
 var_list = ['pT','Eta','Phi','Mass']
@@ -101,15 +102,15 @@ for i in range(num_jet_feats):
     maxi=ak.mean(feat[sig])+2*ak.std(feat[sig])
     ax1.hist(ak.ravel(feat[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
     ax1.hist(ak.ravel(feat[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax1.set_title(var_list[i]+" Before Normalization")
+    ax1.set_title("Jet "+var_list[i]+" Before Normalization")
     ax1.legend()
     mini=ak.mean(norm[sig])-2*ak.std(norm[sig])
     maxi=ak.mean(norm[sig])+2*ak.std(norm[sig])
     ax2.hist(ak.ravel(norm[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
     ax2.hist(ak.ravel(norm[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax2.set_title(var_list[i]+" After Normalization")
+    ax2.set_title("Jet "+var_list[i]+" After Normalization")
     ax2.legend()
-    plt.savefig(out_dir+"Normalized_Jet_"+var_list[i]+".png")
+    plt.savefig(out_dir+"/Normalized_Jet_"+var_list[i]+".png")
     #plt.show()
     #print("Mean Before: ", mean, "\t\t Mean After: ", ak.mean(norm))
     #print("STD Before: ", std, "\t\t STD After: ", ak.std(norm))
@@ -120,7 +121,7 @@ plt.hist(ak.ravel(selected_jets[:,:,-1][sig]),histtype='step',label='HS',bins=30
 plt.hist(ak.ravel(selected_jets[:,:,-1][bkg]),histtype='step',label='PU',bins=30,range=(0,1))
 plt.yscale('log')
 plt.legend()
-plt.savefig(out_dir+"Jet_Label.png")
+plt.savefig(out_dir+"/Jet_Label.png")
 #plt.show()    
     
 # Append Labels
@@ -148,7 +149,7 @@ for i in range(num_trk_feats):
     maxi=ak.mean(feat[sig])+2*ak.std(feat[sig])
     ax1.hist(ak.ravel(feat[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
     ax1.hist(ak.ravel(feat[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax1.set_title(var_list[i]+" Before Normalization")
+    ax1.set_title("Track "+var_list[i]+" Before Normalization")
     ax1.legend()
     if '0' in var_list[i]:
         ax1.set_yscale('log')
@@ -156,11 +157,11 @@ for i in range(num_trk_feats):
     maxi=ak.mean(norm[sig])+2*ak.std(norm[sig])
     ax2.hist(ak.ravel(norm[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
     ax2.hist(ak.ravel(norm[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax2.set_title(var_list[i]+" After Normalization")
+    ax2.set_title("Track "+var_list[i]+" After Normalization")
     ax2.legend()
     if '0' in var_list[i]:
         ax2.set_yscale('log')
-    plt.savefig(out_dir+"Normalized_Track_"+var_list[i]+".png")
+    plt.savefig(out_dir+"/Normalized_Track_"+var_list[i]+".png")
     #plt.show()
     #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
     #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))

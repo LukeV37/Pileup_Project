@@ -11,17 +11,20 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 
 import pickle
+import sys
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-in_data = "data/data_diHiggs_20k_Mfrac.pkl"
-out_path = "plots/Mfrac_regression/"
+Epochs = int(sys.argv[1])
+in_sample = str(sys.argv[2])
+out_file = str(sys.argv[3])
+out_path = str(sys.argv[4])
 
 print("Loading Data into memory...")
-data = pickle.load( open( in_data , "rb" ) )
+data = pickle.load( open( in_sample , "rb" ) )
 X_train, y_train, X_val, y_val, X_test, y_test = data
 
 class Encoder(nn.Module):
@@ -206,14 +209,17 @@ optimizer = optim.AdamW(model.parameters(), lr=0.0001)
 
 loss_fn = nn.MSELoss()
 
-combined_history = train(model, optimizer, X_train, y_train, X_val, y_val,epochs=40)
+combined_history = train(model, optimizer, X_train, y_train, X_val, y_val,epochs=Epochs)
+
+torch.save(model,out_file)
 
 plt.figure()
 plt.plot(combined_history[:,0], label="Train")
 plt.plot(combined_history[:,1], label="Val")
 plt.title('Loss')
 plt.legend()
-plt.savefig(out_path+"Loss_Curve.png")
+plt.yscale('log')
+plt.savefig(out_path+"/Loss_Curve.png")
 #plt.show()
 
 
@@ -256,7 +262,7 @@ plt.title("Predicted Ouput Distribution using Attention Model (\u03BC=60)")
 plt.legend()
 plt.yscale('log')
 plt.xlabel('PU Fraction',loc='right')
-plt.savefig(out_path+"pred_1d.png")
+plt.savefig(out_path+"/pred_1d.png")
 #plt.show()
 
 plt.figure()
@@ -264,7 +270,7 @@ plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
 plt.hist2d(predicted_labels,true_labels, bins=100,norm=mcolors.PowerNorm(0.2))
 plt.xlabel('Predicted PU Fraction',loc='right')
 plt.ylabel('True PU Fraction',loc='top')
-plt.savefig(out_path+"pred_2d.png")
+plt.savefig(out_path+"/pred_2d.png")
 #plt.show()
 
 
@@ -332,7 +338,7 @@ ax1.grid(which='both')
 ax2.grid(which='both')
 ax1.set_xlim(0.3,1)
 ax2.set_xlim(0.3,1)
-plt.savefig(out_path+"ATLAS_ROC.png")
+plt.savefig(out_path+"/ATLAS_ROC.png")
 #plt.show()
 
 print("PUFNN\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11)
@@ -352,7 +358,6 @@ for i, file in enumerate(file_names):
 print("Trainable Parameters :", np.sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
-torch.save(model,"results/MfracNN_diHiggs_20k.torch")
 
 
 #model = torch.load("PUFNN.torch")
