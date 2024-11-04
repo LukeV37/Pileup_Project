@@ -9,11 +9,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+sample_type="diHiggs" # diHiggs or 4b
+
 path_to_Efrac_model="./results/EfracNN_diHiggs_20k.torch"
 path_to_Mfrac_model="./results/MfracNN_diHiggs_20k.torch"
 
 print("Loading sample into memory...")
-with uproot.open("/mnt/shared/lvaughan/Pileup_ntuples/dataset_mu60_H1A3_10k_true_EMfrac.root:fastjet") as f:
+with uproot.open("../pythia/output/dataset_"+sample_type+"_mu60_NumEvents20k_Eval_MinJetpT25.root:fastjet") as f:
     jet_pt = f["jet_pt"].array()
     jet_eta = f["jet_eta"].array()
     jet_phi = f["jet_phi"].array()
@@ -21,22 +23,22 @@ with uproot.open("/mnt/shared/lvaughan/Pileup_ntuples/dataset_mu60_H1A3_10k_true
     #jet_RpT = f["jet_RpT"].array()
     jet_m = f["jet_m"].array()
     
-    #trk_pt = f["trk_jet_pT"].array()
-    #trk_eta = f["trk_jet_eta"].array()
-    #trk_phi = f["trk_jet_phi"].array()
-    #trk_q = f["trk_jet_q"].array()
-    #trk_d0 = f["trk_jet_d0"].array()
-    #trk_z0 = f["trk_jet_z0"].array()
-    #trk_label = f["trk_jet_label"].array()
+    trk_pt = f["trk_jet_pT"].array()
+    trk_eta = f["trk_jet_eta"].array()
+    trk_phi = f["trk_jet_phi"].array()
+    trk_q = f["trk_jet_q"].array()
+    trk_d0 = f["trk_jet_d0"].array()
+    trk_z0 = f["trk_jet_z0"].array()
+    trk_label = f["trk_jet_label"].array()
     
-    trk_pt = f["trk_pT"].array()
-    trk_eta = f["trk_eta"].array()
-    trk_phi = f["trk_phi"].array()
-    trk_q = f["trk_q"].array()
-    trk_d0 = f["trk_d0"].array()
-    trk_z0 = f["trk_z0"].array()
-    trk_label = f["trk_label"].array()
-    jet_trk_IDX = f["jet_track_index"].array()
+    #trk_pt = f["trk_pT"].array()
+    #trk_eta = f["trk_eta"].array()
+    #trk_phi = f["trk_phi"].array()
+    #trk_q = f["trk_q"].array()
+    #trk_d0 = f["trk_d0"].array()
+    #trk_z0 = f["trk_z0"].array()
+    #trk_label = f["trk_label"].array()
+    #jet_trk_IDX = f["jet_track_index"].array()
     
     event_no = ak.zeros_like(jet_pt).to_list()
     jet_no = ak.zeros_like(jet_pt).to_list()
@@ -59,50 +61,50 @@ print("\tNum Events: ", len(jet_feats))
 print("\tNum Jets in first event: ", len(jet_feats[0]))
 print("\tNum Jet Features: ", len(jet_feats[0][0]))
 
-#print("Joining track features...")
-#trk_feat_list = [trk_pt,trk_eta,trk_phi,trk_q,trk_d0,trk_z0,trk_label]
-#trk_feat_list = [x[:,:,:,np.newaxis] for x in trk_feat_list]
-#trk_feats = ak.concatenate(trk_feat_list, axis=3)
-#print("\tNum Events: ", len(trk_feats))
-#print("\tNum Jets in first event: ", len(trk_feats[0]))
-#print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
-#print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
-
-
 print("Joining track features...")
-num_events = len(jet_pt)
-trk_feats = []
-for event in range(num_events):
-    if event%5==0:
-        print("\tProcessing: ", event, " / ", num_events, end="\r")
-    idx_list = list(jet_trk_IDX[event])
-    idx_list.append(len(trk_pt[event]))
-    
-    jet_trk_feats = []
-    for i in range(len(idx_list)-1):
-        start_idx = idx_list[i]
-        end_idx = idx_list[i+1]
-        trk_pt_tmp = np.array(trk_pt[event][start_idx:end_idx])
-        trk_eta_tmp = np.array(trk_eta[event][start_idx:end_idx])
-        trk_phi_tmp = np.array(trk_phi[event][start_idx:end_idx])
-        trk_q_tmp = np.array(trk_q[event][start_idx:end_idx])
-        trk_d0_tmp = np.array(trk_d0[event][start_idx:end_idx])
-        trk_z0_tmp = np.array(trk_z0[event][start_idx:end_idx])
-        trk_label_tmp = np.array(trk_label[event][start_idx:end_idx])
-
-        feats = [trk_pt_tmp, trk_eta_tmp, trk_phi_tmp, trk_q_tmp,
-                trk_d0_tmp, trk_z0_tmp, trk_label_tmp]
-        feats = np.stack(feats, axis=-1)
-        jet_trk_feats.append(feats)
-    
-    trk_feats.append(jet_trk_feats)
-    
-print("\tProcessing: ", num_events, " / ", num_events)
-trk_feats = ak.Array(trk_feats)
+trk_feat_list = [trk_pt,trk_eta,trk_phi,trk_q,trk_d0,trk_z0,trk_label]
+trk_feat_list = [x[:,:,:,np.newaxis] for x in trk_feat_list]
+trk_feats = ak.concatenate(trk_feat_list, axis=3)
 print("\tNum Events: ", len(trk_feats))
 print("\tNum Jets in first event: ", len(trk_feats[0]))
 print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
 print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
+
+
+#print("Joining track features...")
+#num_events = len(jet_pt)
+#trk_feats = []
+#for event in range(num_events):
+#    if event%5==0:
+#        print("\tProcessing: ", event, " / ", num_events, end="\r")
+#    idx_list = list(jet_trk_IDX[event])
+#    idx_list.append(len(trk_pt[event]))
+#    
+#    jet_trk_feats = []
+#    for i in range(len(idx_list)-1):
+#        start_idx = idx_list[i]
+#        end_idx = idx_list[i+1]
+#        trk_pt_tmp = np.array(trk_pt[event][start_idx:end_idx])
+#        trk_eta_tmp = np.array(trk_eta[event][start_idx:end_idx])
+#        trk_phi_tmp = np.array(trk_phi[event][start_idx:end_idx])
+#        trk_q_tmp = np.array(trk_q[event][start_idx:end_idx])
+#        trk_d0_tmp = np.array(trk_d0[event][start_idx:end_idx])
+#        trk_z0_tmp = np.array(trk_z0[event][start_idx:end_idx])
+#        trk_label_tmp = np.array(trk_label[event][start_idx:end_idx])
+#
+#        feats = [trk_pt_tmp, trk_eta_tmp, trk_phi_tmp, trk_q_tmp,
+#                trk_d0_tmp, trk_z0_tmp, trk_label_tmp]
+#        feats = np.stack(feats, axis=-1)
+#        jet_trk_feats.append(feats)
+#    
+#    trk_feats.append(jet_trk_feats)
+#    
+#print("\tProcessing: ", num_events, " / ", num_events)
+#trk_feats = ak.Array(trk_feats)
+#print("\tNum Events: ", len(trk_feats))
+#print("\tNum Jets in first event: ", len(trk_feats[0]))
+#print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
+#print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
 
 print("Applying Cuts...")
 # Apply Jet cuts
@@ -361,10 +363,10 @@ for event in range(num_events):
         event_No = int(Event_Labels[event][0][jet].detach().numpy())
         jet_No = int(Event_Labels[event][1][jet].detach().numpy())
 
-        Mfrac[event_No][jet_No] = float(Efr_pred[jet][0])
-        Efrac[event_No][jet_No] = float(Mfr_pred[jet][0])
+        Efrac[event_No][jet_No] = float(Efr_pred[jet][0])
+        Mfrac[event_No][jet_No] = float(Mfr_pred[jet][0])
 print("\tProcessing: ", num_events, " / ", num_events)
 
 print("Saving Scores to ROOT File")
 df = ak.to_rdataframe({"Efrac": Efrac,"Mfrac": Mfrac})
-df.Snapshot("jet_scores", "jet_scores.root", ("Efrac","Mfrac"))
+df.Snapshot("jet_scores", sample_type+"_jet_scores.root", ("Efrac","Mfrac"))
