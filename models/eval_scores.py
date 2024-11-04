@@ -345,7 +345,6 @@ Efrac = Efrac.to_list()
 Mfrac = ak.ones_like(jet_pt) * -1
 Mfrac = Mfrac.to_list()
 
-
 print("Evaluating Efrac and Mfrac")
 num_events=len(Event_Data)
 for event in range(num_events):
