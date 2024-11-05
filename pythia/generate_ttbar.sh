@@ -21,4 +21,9 @@ cd src/scripts
 root -q -l -b add_JVT.cpp\(\""$name"\"\)
 root -q -l -b add_true_pufr.cpp\(\""$name"\"\)
 root -q -l -b add_ttbar_match.cpp\(\""$name"\"\)
+#make
+#make all
+#./add_Likelihood.exe $name
+#make clean
+root -q -l -b add_true_EMfrac.cpp\(\""$name"\"\)
 cd ../..
