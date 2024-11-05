@@ -344,21 +344,15 @@ plt.savefig(out_path+"/ATLAS_ROC.png")
 print("PUFNN\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11)
 print("")
 
-file_names = ["results/MfracNN_Results.np"]
-
-results1 = np.concatenate((x1_v2[np.newaxis],y1_v2[np.newaxis],th1_v2[np.newaxis]),axis=0)
-
-results = [results1]
-
-for i, file in enumerate(file_names):
-    with open(file, 'wb') as f:
-        np.save(f, results[i])
+#file_names = ["results/MfracNN_Results.np"]
+#results1 = np.concatenate((x1_v2[np.newaxis],y1_v2[np.newaxis],th1_v2[np.newaxis]),axis=0)
+#results = [results1]
+#for i, file in enumerate(file_names):
+#    with open(file, 'wb') as f:
+#        np.save(f, results[i])
 
 #print(model)
 print("Trainable Parameters :", np.sum(p.numel() for p in model.parameters() if p.requires_grad))
-
-
-
 
 #model = torch.load("PUFNN.torch")
 
