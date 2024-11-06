@@ -3,24 +3,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import awkward as ak
 import pickle
+import sys
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-sample_type="diHiggs" # diHiggs or 4b
-
-path_to_Efrac_model="./results/EfracNN_diHiggs_20k.torch"
-path_to_Mfrac_model="./results/MfracNN_diHiggs_20k.torch"
+path_to_Efrac_model= str(sys.argv[1])
+path_to_Mfrac_model= str(sys.argv[2])
+in_file = str(sys.argv[3])
+out_file = str(sys.argv[4])
 
 print("Loading sample into memory...")
-with uproot.open("../pythia/output/dataset_"+sample_type+"_mu60_NumEvents20k_Eval_MinJetpT25.root:fastjet") as f:
+with uproot.open(in_file+":fastjet") as f:
     jet_pt = f["jet_pt"].array()
     jet_eta = f["jet_eta"].array()
     jet_phi = f["jet_phi"].array()
-    #jet_corrJVF = f["jet_corrJVF"].array()
-    #jet_RpT = f["jet_RpT"].array()
     jet_m = f["jet_m"].array()
     
     trk_pt = f["trk_jet_pT"].array()
@@ -31,27 +30,16 @@ with uproot.open("../pythia/output/dataset_"+sample_type+"_mu60_NumEvents20k_Eva
     trk_z0 = f["trk_jet_z0"].array()
     trk_label = f["trk_jet_label"].array()
     
-    #trk_pt = f["trk_pT"].array()
-    #trk_eta = f["trk_eta"].array()
-    #trk_phi = f["trk_phi"].array()
-    #trk_q = f["trk_q"].array()
-    #trk_d0 = f["trk_d0"].array()
-    #trk_z0 = f["trk_z0"].array()
-    #trk_label = f["trk_label"].array()
-    #jet_trk_IDX = f["jet_track_index"].array()
-    
     event_no = ak.zeros_like(jet_pt).to_list()
     jet_no = ak.zeros_like(jet_pt).to_list()
 
-
+# Calculate Event Num and Jet Num
 for event in range(len(jet_pt)):
     for jet in range(len(jet_pt[event])):
         event_no[event][jet] = event
         jet_no[event][jet] = jet
-        
 event_no = ak.Array(event_no)
 jet_no = ak.Array(jet_no)
-
 
 print("Joining jet features...")
 jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,event_no,jet_no]
@@ -69,42 +57,6 @@ print("\tNum Events: ", len(trk_feats))
 print("\tNum Jets in first event: ", len(trk_feats[0]))
 print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
 print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
-
-
-#print("Joining track features...")
-#num_events = len(jet_pt)
-#trk_feats = []
-#for event in range(num_events):
-#    if event%5==0:
-#        print("\tProcessing: ", event, " / ", num_events, end="\r")
-#    idx_list = list(jet_trk_IDX[event])
-#    idx_list.append(len(trk_pt[event]))
-#    
-#    jet_trk_feats = []
-#    for i in range(len(idx_list)-1):
-#        start_idx = idx_list[i]
-#        end_idx = idx_list[i+1]
-#        trk_pt_tmp = np.array(trk_pt[event][start_idx:end_idx])
-#        trk_eta_tmp = np.array(trk_eta[event][start_idx:end_idx])
-#        trk_phi_tmp = np.array(trk_phi[event][start_idx:end_idx])
-#        trk_q_tmp = np.array(trk_q[event][start_idx:end_idx])
-#        trk_d0_tmp = np.array(trk_d0[event][start_idx:end_idx])
-#        trk_z0_tmp = np.array(trk_z0[event][start_idx:end_idx])
-#        trk_label_tmp = np.array(trk_label[event][start_idx:end_idx])
-#
-#        feats = [trk_pt_tmp, trk_eta_tmp, trk_phi_tmp, trk_q_tmp,
-#                trk_d0_tmp, trk_z0_tmp, trk_label_tmp]
-#        feats = np.stack(feats, axis=-1)
-#        jet_trk_feats.append(feats)
-#    
-#    trk_feats.append(jet_trk_feats)
-#    
-#print("\tProcessing: ", num_events, " / ", num_events)
-#trk_feats = ak.Array(trk_feats)
-#print("\tNum Events: ", len(trk_feats))
-#print("\tNum Jets in first event: ", len(trk_feats[0]))
-#print("\tNum Tracks in first event first jet: ", len(trk_feats[0][0]))
-#print("\tNum Tracks features: ", len(trk_feats[0][0][0]))
 
 print("Applying Cuts...")
 # Apply Jet cuts
@@ -124,7 +76,6 @@ trackless_jets_mask = (ak.num(selected_tracks, axis=2)!=0)
 selected_jets = selected_jets[trackless_jets_mask]
 selected_tracks = selected_tracks[trackless_jets_mask]
 
-
 print("Normalizing Jet Features...")
 num_jet_feats = len(selected_jets[0][0])-2
 
@@ -133,7 +84,7 @@ bkg = ~sig
 
 var_list = ['pT','Eta','Phi','Mass']
 
-# Normalize and Plot Jet Features
+# Normalize Jet Features
 norm_list = []
 for i in range(num_jet_feats):
     feat = selected_jets[:,:,i]
@@ -142,27 +93,11 @@ for i in range(num_jet_feats):
     norm = (feat-mean)/std
     norm_list.append(norm)
     
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(10,5))
-    mini=ak.mean(feat[sig])-2*ak.std(feat[sig])
-    maxi=ak.mean(feat[sig])+2*ak.std(feat[sig])
-    ax1.hist(ak.ravel(feat[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax1.hist(ak.ravel(feat[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax1.set_title(var_list[i]+" Before Normalization")
-    ax1.legend()
-    mini=ak.mean(norm[sig])-2*ak.std(norm[sig])
-    maxi=ak.mean(norm[sig])+2*ak.std(norm[sig])
-    ax2.hist(ak.ravel(norm[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax2.hist(ak.ravel(norm[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax2.set_title(var_list[i]+" After Normalization")
-    ax2.legend()
-    #plt.savefig("plots/preprocessing/Normalized_Jet_"+var_list[i]+".png")
-    #plt.show()
-    #print("Mean Before: ", mean, "\t\t Mean After: ", ak.mean(norm))
-    #print("STD Before: ", std, "\t\t STD After: ", ak.std(norm))   
-    
 # Append Labels
 norm_list.append(selected_jets[:,:,-2])
 norm_list.append(selected_jets[:,:,-1])
+
+# Combine features
 Norm_list = [x[:,:,np.newaxis] for x in norm_list]
 selected_jets = ak.concatenate(Norm_list, axis=2)
 
@@ -181,28 +116,6 @@ for i in range(num_trk_feats):
     std = ak.std(feat)
     norm = (feat-mean)/std
     norm_list.append(norm)
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(10,5))
-    mini=ak.mean(feat[sig])-2*ak.std(feat[sig])
-    maxi=ak.mean(feat[sig])+2*ak.std(feat[sig])
-    ax1.hist(ak.ravel(feat[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax1.hist(ak.ravel(feat[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax1.set_title(var_list[i]+" Before Normalization")
-    ax1.legend()
-    if '0' in var_list[i]:
-        ax1.set_yscale('log')
-    mini=ak.mean(norm[sig])-2*ak.std(norm[sig])
-    maxi=ak.mean(norm[sig])+2*ak.std(norm[sig])
-    ax2.hist(ak.ravel(norm[sig]),label='HS',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax2.hist(ak.ravel(norm[bkg]),label='PU',histtype='step',bins=20,range=(mini,maxi),density=True)
-    ax2.set_title(var_list[i]+" After Normalization")
-    ax2.legend()
-    if '0' in var_list[i]:
-        ax2.set_yscale('log')
-    #plt.savefig("plots/preprocessing/Normalized_Track_"+var_list[i]+".png")
-    #plt.show()
-    #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
-    #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
-    
 # Add label
 norm_list.append(selected_tracks[:,:,:,-1])
     
@@ -335,7 +248,6 @@ print("GPU Available: ", torch.cuda.is_available())
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
-
 EfracNN = torch.load(path_to_Efrac_model).to(device)
 MfracNN = torch.load(path_to_Mfrac_model).to(device)
 
@@ -367,4 +279,4 @@ print("\tProcessing: ", num_events, " / ", num_events)
 
 print("Saving Scores to ROOT File")
 df = ak.to_rdataframe({"Efrac": Efrac,"Mfrac": Mfrac})
-df.Snapshot("jet_scores", sample_type+"_jet_scores.root", ("Efrac","Mfrac"))
+df.Snapshot("jet_scores", out_file, ("Efrac","Mfrac"))
