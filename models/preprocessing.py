@@ -20,7 +20,7 @@ out_dir = str(sys.argv[4]) # e.g plots/<Dir Name>
 # Awkward arrays are great to perform vectorized operations!
 # However loading the entire dataset into memory can cause issues with hardware limitations...
 # Loading 100k mu=60 events into memory takes 120GB of RAM!
-print("Loading diHiggs sample into memory...")
+print("Loading Sample into memory...")
 with uproot.open(in_sample+":fastjet") as f:
     jet_pt = f["jet_pt"].array()
     jet_eta = f["jet_eta"].array()
