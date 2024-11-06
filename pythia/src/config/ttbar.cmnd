@@ -7,6 +7,8 @@
 ! 1) Settings used in the main program.
 Main:numberOfEvents = 1000         ! number of events to generate
 Main:timesAllowErrors = 3          ! how many aborts before run stops
+Random:setSeed = on
+Random:seed = 1234
 
 ! 2) Settings related to output in init(), next() and stat().
 Init:showChangedSettings = on      ! list changed settings
