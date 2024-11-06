@@ -17,4 +17,4 @@ mkdir -p $out_dir
 nohup python -u Jet_Attention_Model.py $epochs $in_file $out_file $out_dir > "${out_dir}/training.log" 2>&1 &
 
 # To watch the progress of the script, uncomment the following command:
-#tail -f "${out_dir}/training.log"
+tail -f "${out_dir}/training.log"

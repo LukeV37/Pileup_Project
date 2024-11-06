@@ -18,4 +18,4 @@ mkdir -p $out_plots
 nohup python -u preprocessing.py $run_type $in_file $out_file $out_plots > "${out_plots}/preprocessing.log" 2>&1 &
 
 # To watch the progress of the script, uncomment the following command:
-#tail -f "${out_plots}/preprocessing.log"
+tail -f "${out_plots}/preprocessing.log"
