@@ -61,6 +61,7 @@ Tested on Ubuntu 22.04, EL9 lxplus machine, and even WSL2.
 
 Required Dependencies:
 <ul>
+  <li>python3</li>
   <li>ROOTv6</li>
   <li>autoconf</li>
   <li>libtool</li>
