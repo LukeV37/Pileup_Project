@@ -20,7 +20,8 @@ with uproot.open(sig_sample+":fastjet") as f:
     jet_eta_sig = f["jet_eta"].array()
     jet_phi_sig = f["jet_phi"].array()
     jet_m_sig = f["jet_m"].array()
-    jet_pufr_truth_sig = f["jet_pufr_truth"].array()
+    jet_Efrac_truth_sig = f["jet_Efrac_truth"].array()
+    jet_Efrac_truth_sig = f["jet_Mfrac_truth"].array()
     
     # trk features
     trk_pt_sig = f["trk_jet_pT"].array()
@@ -40,7 +41,8 @@ with uproot.open(bkg_sample+":fastjet") as f:
     jet_eta_bkg = f["jet_eta"].array()
     jet_phi_bkg = f["jet_phi"].array()
     jet_m_bkg = f["jet_m"].array()
-    jet_pufr_truth_bkg = f["jet_pufr_truth"].array()
+    jet_Efrac_truth_bkg = f["jet_Efrac_truth"].array()
+    jet_Efrac_truth_bkg = f["jet_Mfrac_truth"].array()
     
     # trk features
     trk_pt_bkg = f["trk_jet_pT"].array()
@@ -60,7 +62,8 @@ jet_pt = ak.concatenate([jet_pt_sig, jet_pt_bkg], axis=0)
 jet_eta = ak.concatenate([jet_eta_sig, jet_eta_bkg], axis=0)
 jet_phi = ak.concatenate([jet_phi_sig, jet_phi_bkg], axis=0)
 jet_m = ak.concatenate([jet_m_sig, jet_m_bkg], axis=0)
-jet_pufr_truth = ak.concatenate([jet_pufr_truth_sig, jet_pufr_truth_bkg], axis=0)
+jet_Efrac_truth = ak.concatenate([jet_Efrac_truth_sig, jet_Efrac_truth_bkg], axis=0)
+jet_Mfrac_truth = ak.concatenate([jet_Mfrac_truth_sig, jet_Mfrac_truth_bkg], axis=0)
 
 trk_pt = ak.concatenate([trk_pt_sig, trk_pt_bkg], axis=0)
 trk_eta = ak.concatenate([trk_eta_sig, trk_eta_bkg], axis=0)
@@ -72,7 +75,7 @@ trk_z0 = ak.concatenate([trk_z0_sig, trk_z0_bkg], axis=0)
 labels = ak.concatenate([label_sig, label_bkg], axis=0)
 
 print("Joining jet features...")
-jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_pufr_truth]
+jet_feat_list = [jet_pt,jet_eta,jet_phi,jet_m,jet_Efrac_truth,jet_Mfrac_truth]
 jet_feat_list = [x[:,:,np.newaxis] for x in jet_feat_list]
 jet_feats = ak.concatenate(jet_feat_list, axis=2)
 print("\tNum Events: ", len(jet_feats))
@@ -115,7 +118,7 @@ selected_tracks = selected_tracks[trackless_jets_mask]
 
 
 print("Normalizing Jet Features...")
-num_jet_feats = len(selected_jets[0][0])-1
+num_jet_feats = len(selected_jets[0][0])-2
 
 sig = labels==1
 bkg = ~sig
@@ -150,12 +153,21 @@ for i in range(num_jet_feats):
     #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
 
 plt.figure()
-plt.title("Jet PUFR")
+plt.title("Jet Efrac")
+plt.hist(ak.ravel(selected_jets[:,:,-2][sig]),histtype='step',label='diHiggs',bins=30,range=(0,1))
+plt.hist(ak.ravel(selected_jets[:,:,-2][bkg]),histtype='step',label='4b',bins=30,range=(0,1))
+plt.yscale('log')
+plt.legend()
+plt.savefig(out_dir+"/Jet_Efrac_truth.png")
+#plt.show()
+
+plt.figure()
+plt.title("Jet Mfrac")
 plt.hist(ak.ravel(selected_jets[:,:,-1][sig]),histtype='step',label='diHiggs',bins=30,range=(0,1))
 plt.hist(ak.ravel(selected_jets[:,:,-1][bkg]),histtype='step',label='4b',bins=30,range=(0,1))
 plt.yscale('log')
 plt.legend()
-plt.savefig(out_dir+"/Jet_PUFR.png")
+plt.savefig(out_dir+"/Jet_Mfrac_truth.png")
 #plt.show()
 
 plt.figure()
@@ -167,6 +179,7 @@ plt.savefig(out_dir+"/Event_Label.png")
 #plt.show()
     
 # Append Labels
+norm_list.append(selected_jets[:,:,-2])
 norm_list.append(selected_jets[:,:,-1])
 
 Norm_list = [x[:,:,np.newaxis] for x in norm_list]
