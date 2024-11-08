@@ -20,8 +20,8 @@ with uproot.open(sig_sample+":fastjet") as f:
     jet_eta_sig = f["jet_eta"].array()
     jet_phi_sig = f["jet_phi"].array()
     jet_m_sig = f["jet_m"].array()
-    jet_Efrac_truth_sig = f["jet_Efrac_truth"].array()
-    jet_Efrac_truth_sig = f["jet_Mfrac_truth"].array()
+    jet_Efrac_truth_sig = f["jet_true_Efrac"].array()
+    jet_Mfrac_truth_sig = f["jet_true_Mfrac"].array()
     
     # trk features
     trk_pt_sig = f["trk_jet_pT"].array()
@@ -41,8 +41,8 @@ with uproot.open(bkg_sample+":fastjet") as f:
     jet_eta_bkg = f["jet_eta"].array()
     jet_phi_bkg = f["jet_phi"].array()
     jet_m_bkg = f["jet_m"].array()
-    jet_Efrac_truth_bkg = f["jet_Efrac_truth"].array()
-    jet_Efrac_truth_bkg = f["jet_Mfrac_truth"].array()
+    jet_Efrac_truth_bkg = f["jet_true_Efrac"].array()
+    jet_Mfrac_truth_bkg = f["jet_true_Mfrac"].array()
     
     # trk features
     trk_pt_bkg = f["trk_jet_pT"].array()
