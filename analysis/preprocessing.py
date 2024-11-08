@@ -3,12 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import awkward as ak
 import pickle
+import sys
 
 import torch
 import torch.nn.functional as F
 
-print("Loading diHiggs sample into memory...")
-with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents50k_MinJetpT25.root:fastjet") as f:
+sig_sample = str(sys.argv[1]) # e.g. ../pythia/output/<sig>.root
+bkg_sample = str(sys.argv[2]) # e.g. ../pythia/output/<bkg>.root
+out_sample = str(sys.argv[3]) # e.g. data/<file>.pkl
+out_dir = str(sys.argv[4]) # e.g plots/<Dir Name>
+
+print("Loading sig sample into memory...")
+with uproot.open(sig_sample+":fastjet") as f:
     # jet features
     jet_pt_sig = f["jet_pt"].array()
     jet_eta_sig = f["jet_eta"].array()
@@ -27,8 +33,8 @@ with uproot.open("../pythia/output/dataset_diHiggs_mu60_NumEvents50k_MinJetpT25.
     # event label
     label_sig = np.ones(len(jet_pt_sig))
     
-print("Loading 4b sample into memory...")
-with uproot.open("../pythia/output/dataset_4b_mu60_NumEvents50k_MinJetpT25.root:fastjet") as f:
+print("Loading bkg sample into memory...")
+with uproot.open(bkg_sample+":fastjet") as f:
     # jet features
     jet_pt_bkg = f["jet_pt"].array()
     jet_eta_bkg = f["jet_eta"].array()
@@ -138,7 +144,7 @@ for i in range(num_jet_feats):
     ax2.hist(ak.ravel(norm[bkg]),label='4b',histtype='step',bins=20,range=(mini,maxi))
     ax2.set_title(var_list[i]+" After Normalization")
     ax2.legend()
-    plt.savefig("plots/preprocessing/Normalized_Jet_"+var_list[i]+".png")
+    plt.savefig(out_dir+"/Normalized_Jet_"+var_list[i]+".png")
     #plt.show()
     #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
     #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
@@ -149,7 +155,7 @@ plt.hist(ak.ravel(selected_jets[:,:,-1][sig]),histtype='step',label='diHiggs',bi
 plt.hist(ak.ravel(selected_jets[:,:,-1][bkg]),histtype='step',label='4b',bins=30,range=(0,1))
 plt.yscale('log')
 plt.legend()
-plt.savefig("plots/preprocessing/Jet_PUFR.png")
+plt.savefig(out_dir+"/Jet_PUFR.png")
 #plt.show()
 
 plt.figure()
@@ -157,7 +163,7 @@ plt.title("Event Label")
 plt.hist(labels[sig],histtype='step',bins=30,label='diHiggs',range=(0,1))
 plt.hist(labels[bkg],histtype='step',bins=30,label='4b',range=(0,1))
 plt.legend()
-plt.savefig("plots/preprocessing/Event_Label.png")
+plt.savefig(out_dir+"/Event_Label.png")
 #plt.show()
     
 # Append Labels
@@ -198,7 +204,7 @@ for i in range(num_trk_feats):
     ax2.legend()
     if '0' in var_list[i]:
         ax2.set_yscale('log')
-    plt.savefig("plots/preprocessing/Normalized_Track_"+var_list[i]+".png")
+    plt.savefig(out_dir+"/Normalized_Track_"+var_list[i]+".png")
     #plt.show()
     #print("Mean Before: ", mean, "\nMean After: ", ak.mean(norm))
     #print("STD Before: ", std, "\nSTD After: ", ak.std(norm))
@@ -252,7 +258,7 @@ X_test, y_test = list(zip(*Events_testing))
 data = (X_train, y_train, X_val, y_val, X_test, y_test)
 
 print("Writing dataset to file...")
-pickle.dump(data, open("data/data_combined.pkl", "wb"))
+pickle.dump(data, open( out_sample, "wb"))
 
 debug=False
 if debug:
@@ -267,3 +273,5 @@ if debug:
     print()
     print("y_train Indices Reference:")
     print("\tNum Events: ", len(y_train))
+ 
+print("Done!")
