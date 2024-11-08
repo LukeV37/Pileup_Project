@@ -5,6 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import pickle
+import sys
 
 import torch
 import torch.nn as nn
@@ -16,9 +17,17 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 
+Epochs = int(sys.argv[1])
+in_data = str(sys.argv[2])
+Efrac_model = str(sys.argv[3])
+Mfrac_model = str(sys.argv[4])
+out_pred = str(sys.argv[5])
+out_truth = str(sys.argv[6])
+out_baseline = str(sys.argv[7])
+out_dir = str(sys.argv[8])
 
 print("Loading Data into memory...")
-data = pickle.load( open( "data/data_combined_100k.pkl", "rb" ) )
+data = pickle.load( open( in_data , "rb" ) )
 X_train, y_train, X_val, y_val, X_test, y_test = data
 
 class Encoder(nn.Module):
@@ -120,56 +129,69 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #print(device)
 #print()
 
-model = torch.load("../models/results/PUFNN_diHiggs_50k.torch")
-
-PUFrANN = model.to(device)
+EfracNN = torch.load(Efrac_model).to(device)
+MfracNN = torch.load(Mfrac_model).to(device)
 
 def calc_pred(X, y):
     # Process data
     jet = []
     label = []
-    pufr = []
+    Efrac = []
+    Mfrac = []
     for event in range(len(X)):
         if event%5 == 0:
-            print("\tEvaluating PUFR Prediction: ", event, " / ", len(X), end="\r")
+            print("\tEvaluating Efrac & Mfrac Predictions: ", event, " / ", len(X), end="\r")
         jets = X[event][0][:,0:4]
         jet_trks = X[event][1]
         trks = X[event][2]
-        pufr_pred = PUFrANN(jets.to(device),jet_trks.to(device),trks.to(device))[0].detach().cpu()
-        jets = torch.cat((jets,pufr_pred),dim=1)
+        Efrac_pred = EfracNN(jets.to(device),jet_trks.to(device),trks.to(device))[0].detach().cpu()
+        Mfrac_pred = MfracNN(jets.to(device),jet_trks.to(device),trks.to(device))[0].detach().cpu()
+        jets = torch.cat((jets,Efrac_pred,Mfrac_pred),dim=1)
         jet.append(jets.tolist())
         label.append(y[event])
-        pufr.append(X[event][0][:,-1].reshape(-1,1).tolist())
-    print("\tEvaluating PUFR Prediction: ", len(X), " / ", len(X))
+        Efrac.append(X[event][0][:,-2].reshape(-1,1).tolist())
+        Mfrac.append(X[event][0][:,-1].reshape(-1,1).tolist())
+    print("\tEvaluating Efrac & Mfrac Predictions: ", len(X), " / ", len(X))
     
     # Convert to Awkward Array
     jet = ak.Array(jet)
     label = ak.Array(label)
-    pufr = ak.Array(pufr)
+    Efrac = ak.Array(Efrac)
+    Mfrac = ak.Array(Mfrac)
           
     # Calculate baseline and truth datasets
     dataset = jet
     baseline = jet[:,:,0:4]
-    truth = ak.concatenate([baseline,pufr], axis=2)
+    truth = ak.concatenate([baseline,Efrac,Mfrac], axis=2)
                      
     return dataset, baseline, truth, label
     
 print("Processing training dataset...")
-X_train_pufr, X_train_baseline, X_train_truth, y_train = calc_pred(X_train, y_train)
+X_train_pred, X_train_baseline, X_train_truth, y_train = calc_pred(X_train, y_train)
 print("Processing validation dataset...")
-X_val_pufr, X_val_baseline, X_val_truth, y_val = calc_pred(X_val, y_val) 
+X_val_pred, X_val_baseline, X_val_truth, y_val = calc_pred(X_val, y_val) 
 print("Processing testing dataset...")
-X_test_pufr, X_test_baseline, X_test_truth, y_test = calc_pred(X_test, y_test) 
+X_test_pred, X_test_baseline, X_test_truth, y_test = calc_pred(X_test, y_test) 
 
 
 plt.figure()
 plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
-pufr_pred = ak.flatten(X_test_pufr[:,:,-1])
-pufr_truth = ak.flatten(X_test_truth[:,:,-1])
-plt.hist2d(np.array(pufr_pred),np.array(pufr_truth),bins=100,norm=mcolors.PowerNorm(0.2))
+Efrac_pred = ak.flatten(X_test_pred[:,:,-1])
+Efrac_truth = ak.flatten(X_test_truth[:,:,-1])
+plt.hist2d(np.array(Efrac_pred),np.array(Efrac_truth),bins=100,norm=mcolors.PowerNorm(0.2))
 plt.xlabel('Predicted PU Fraction',loc='right')
 plt.ylabel('True PU Fraction',loc='top')
-plt.savefig("plots/classifier/Pred_vs_True_PUFR.png")
+plt.savefig(out_dir+"/Efrac_Pred_vs_True_PUFR.png")
+#plt.show()
+
+plt.figure()
+plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
+Mfrac_pred = ak.flatten(X_test_pred[:,:,-1])
+Mfrac_truth = ak.flatten(X_test_truth[:,:,-1])
+plt.hist2d(np.array(Mfrac_pred),np.array(Mfrac_truth),bins=100,norm=mcolors.PowerNorm(0.2))
+plt.xlabel('Predicted PU Fraction',loc='right')
+plt.ylabel('True PU Fraction',loc='top')
+plt.savefig(out_dir+"/Mfrac_Pred_vs_True_PUFR.png")
 #plt.show()
 
 plot=False
@@ -217,17 +239,17 @@ if plot:
 
 
 # Convert to torch.Tensor()
-X_train_pufr = torch.nested.nested_tensor(ak.to_list(X_train_pufr))
+X_train_pred = torch.nested.nested_tensor(ak.to_list(X_train_pred))
 X_train_truth = torch.nested.nested_tensor(ak.to_list(X_train_truth))
 X_train_baseline = torch.nested.nested_tensor(ak.to_list(X_train_baseline))
 y_train = torch.Tensor(ak.to_list(y_train)).reshape(-1,1)
 
-X_val_pufr = torch.nested.nested_tensor(ak.to_list(X_val_pufr))
+X_val_pred = torch.nested.nested_tensor(ak.to_list(X_val_pred))
 X_val_truth = torch.nested.nested_tensor(ak.to_list(X_val_truth))
 X_val_baseline = torch.nested.nested_tensor(ak.to_list(X_val_baseline))
 y_val = torch.Tensor(ak.to_list(y_val)).reshape(-1,1)
 
-X_test_pufr = torch.nested.nested_tensor(ak.to_list(X_test_pufr))
+X_test_pred = torch.nested.nested_tensor(ak.to_list(X_test_pred))
 X_test_truth = torch.nested.nested_tensor(ak.to_list(X_test_truth))
 X_test_baseline = torch.nested.nested_tensor(ak.to_list(X_test_baseline))
 y_test = torch.Tensor(ak.to_list(y_test)).reshape(-1,1)
@@ -327,21 +349,36 @@ def train(model, optimizer, data, epochs=20):
 # Use BinaryCrossEntropy for binary classification
 loss_fn = nn.BCELoss()
 
-Epochs = 30
+# Train model with pt,eta,phi,m
+print("Training Baseline")
+Baseline = Model2(4,128,1).to(device)
+optimizer_baseline = optim.AdamW(Baseline.parameters(), lr=0.0001, weight_decay=0.01)
+data = [X_train_baseline, y_train, X_val_baseline, y_val]
+Baseline_history = train(Baseline, optimizer_baseline, data, epochs=Epochs)
+torch.save(Baseline, out_baseline)
 
-# Train model with pt,eta,phi,m,pufr
-print("Training with Pred PUFR")
-PUFR = Model2(5,128,1).to(device)
-optimizer_pufr = optim.AdamW(PUFR.parameters(), lr=0.0001, weight_decay=0.01)
-data = [X_train_pufr, y_train, X_val_pufr, y_val]
-PUFR_history = train(PUFR, optimizer_pufr, data, epochs=Epochs)
+plt.figure()
+plt.plot(Baseline_history['train_loss'],label='train')
+plt.plot(Baseline_history['test_loss'],label='validation')
+plt.title("Baseline Loss")
+plt.legend()
+plt.savefig(out_dir+"/Baseline_Loss_Curve.png")
+print()
+
+# Train model with pt,eta,phi,m,Efrac,Mfrac
+print("Training with Pred")
+Pred = Model2(5,128,1).to(device)
+optimizer_pred = optim.AdamW(Pred.parameters(), lr=0.0001, weight_decay=0.01)
+data = [X_train_pred, y_train, X_val_pred, y_val]
+PUFR_history = train(Pred, optimizer_pred, data, epochs=Epochs)
+torch.save(Pred, out_pred)
 
 plt.figure()
 plt.plot(PUFR_history['train_loss'],label='train')
 plt.plot(PUFR_history['test_loss'],label='validation')
-plt.title("Pred pufr Loss")
+plt.title("Pred Loss")
 plt.legend()
-plt.savefig("plots/classifier/Pred_PUFR_Loss_Curve.png")
+plt.savefig(out_dir+"/Pred_Loss_Curve.png")
 print()
 
 # Train model with pt,eta,phi,m,truth
@@ -350,29 +387,16 @@ Truth = Model2(5,128,1).to(device)
 optimizer_truth = optim.AdamW(Truth.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_truth, y_train, X_val_truth, y_val]
 Truth_history = train(Truth, optimizer_truth, data, epochs=Epochs)
+torch.save(Pred, out_truth)
 
 plt.figure()
 plt.plot(Truth_history['train_loss'],label='train')
 plt.plot(Truth_history['test_loss'],label='validation')
-plt.title("Truth pufr Loss")
+plt.title("Truth Loss")
 plt.legend()
-plt.savefig("plots/classifier/Truth_PUFR_Loss_Curve.png")
+plt.savefig(out_dir+"/Truth_Loss_Curve.png")
 print()
 
-# Train model with pt,eta,phi,m
-print("Training Baseline")
-Baseline = Model2(4,128,1).to(device)
-optimizer_baseline = optim.AdamW(Baseline.parameters(), lr=0.0001, weight_decay=0.01)
-data = [X_train_baseline, y_train, X_val_baseline, y_val]
-Baseline_history = train(Baseline, optimizer_baseline, data, epochs=Epochs)
-
-plt.figure()
-plt.plot(Baseline_history['train_loss'],label='train')
-plt.plot(Baseline_history['test_loss'],label='validation')
-plt.title("Baseline")
-plt.legend()
-plt.savefig("plots/classifier/Baseline_Loss_Curve.png")
-print()
 
 def ATLAS_roc(y_true, y_pred):
     sig = (y_true==1)
@@ -456,7 +480,7 @@ ax1.set_ylim(1,6)
 ax1.set_xlim(0.6,1)
 ax2.set_xlim(0.6,1)
 ax2.set_ylim(0.9,1.3)
-plt.savefig("plots/classifier/ATLAS_ROC.png")
+plt.savefig(out_dir+"/ATLAS_ROC.png")
 
 with open("plots/classifier/metrics.txt", "w") as f:
     print("Pred PUFR\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1, file=f)
@@ -487,4 +511,6 @@ plt.hist(baseline_pred[~mask],color='b',histtype='step',label='4b (wo pufr)',bin
 
 #plt.yscale('log')
 plt.legend()
-plt.savefig("plots/classifier/Model_Score.png")
+plt.savefig(out_dir+"/Model_Score.png")
+
+print("Done!")
