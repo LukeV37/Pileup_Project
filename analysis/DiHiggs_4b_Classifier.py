@@ -175,22 +175,22 @@ X_test_pred, X_test_baseline, X_test_truth, y_test = calc_pred(X_test, y_test)
 
 
 plt.figure()
-plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
-Efrac_pred = ak.flatten(X_test_pred[:,:,-1])
-Efrac_truth = ak.flatten(X_test_truth[:,:,-1])
+plt.title("Predicted Efrac using Attention Model (\u03BC=60)")
+Efrac_pred = ak.flatten(X_test_pred[:,:,-2])
+Efrac_truth = ak.flatten(X_test_truth[:,:,-2])
 plt.hist2d(np.array(Efrac_pred),np.array(Efrac_truth),bins=100,norm=mcolors.PowerNorm(0.2))
-plt.xlabel('Predicted PU Fraction',loc='right')
-plt.ylabel('True PU Fraction',loc='top')
+plt.xlabel('Predicted Efrac',loc='right')
+plt.ylabel('True Efrac',loc='top')
 plt.savefig(out_dir+"/Efrac_Pred_vs_True_PUFR.png")
 #plt.show()
 
 plt.figure()
-plt.title("Ouput Distribution using Attention Model (\u03BC=60)")
+plt.title("Predicted Mfrac using Attention Model (\u03BC=60)")
 Mfrac_pred = ak.flatten(X_test_pred[:,:,-1])
 Mfrac_truth = ak.flatten(X_test_truth[:,:,-1])
 plt.hist2d(np.array(Mfrac_pred),np.array(Mfrac_truth),bins=100,norm=mcolors.PowerNorm(0.2))
-plt.xlabel('Predicted PU Fraction',loc='right')
-plt.ylabel('True PU Fraction',loc='top')
+plt.xlabel('Predicted Mfrac',loc='right')
+plt.ylabel('True Mfrac',loc='top')
 plt.savefig(out_dir+"/Mfrac_Pred_vs_True_PUFR.png")
 #plt.show()
 
@@ -367,7 +367,7 @@ print()
 
 # Train model with pt,eta,phi,m,Efrac,Mfrac
 print("Training with Pred")
-Pred = Model2(5,128,1).to(device)
+Pred = Model2(6,128,1).to(device)
 optimizer_pred = optim.AdamW(Pred.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_pred, y_train, X_val_pred, y_val]
 PUFR_history = train(Pred, optimizer_pred, data, epochs=Epochs)
@@ -383,7 +383,7 @@ print()
 
 # Train model with pt,eta,phi,m,truth
 print("Training with Truth")
-Truth = Model2(5,128,1).to(device)
+Truth = Model2(6,128,1).to(device)
 optimizer_truth = optim.AdamW(Truth.parameters(), lr=0.0001, weight_decay=0.01)
 data = [X_train_truth, y_train, X_val_truth, y_val]
 Truth_history = train(Truth, optimizer_truth, data, epochs=Epochs)
@@ -438,11 +438,11 @@ def get_metrics(y_true, y_pred, threshold):
 
 fig, (ax1, ax2) = plt.subplots(2,1,figsize=(16,9), gridspec_kw={'height_ratios': [3, 1]})
 
-pufr_pred = get_predictions(PUFR, X_test_pufr)
+pred_pred = get_predictions(Pred, X_test_pred)
 truth_pred = get_predictions(Truth, X_test_truth)
 baseline_pred = get_predictions(Baseline, X_test_baseline)
 
-x1,y1,th1,AUC1,BA1,f11 = get_metrics(y_test, pufr_pred, 0.5)
+x1,y1,th1,AUC1,BA1,f11 = get_metrics(y_test, pred_pred, 0.5)
 x2,y2,th2,AUC2,BA2,f12 = get_metrics(y_test, truth_pred, 0.5)
 x3,y3,th3,AUC3,BA3,f13 = get_metrics(y_test, baseline_pred, 0.5)
 
@@ -450,10 +450,10 @@ ax1.set_title("ATLAS ROC Curve")
 ax1.set_xlabel("sig eff",loc='right')
 ax1.set_ylabel("bkg rej")
 
-ax1.plot(x1,y1, label="Pred PUFR",color='b')
+ax1.plot(x1,y1, label="Pred",color='b')
 #AUC = "All Jets ROC AUC: " + str(round(AUC1,4))
 
-ax1.plot(x2,y2, label="Truth PUFR",color='g')
+ax1.plot(x2,y2, label="Truth",color='g')
 #AUC = "All Jets ROC AUC: " + str(round(AUC1,4))
 #ax1.text(0.71,8,AUC)
 
@@ -483,13 +483,13 @@ ax2.set_ylim(0.9,1.3)
 plt.savefig(out_dir+"/ATLAS_ROC.png")
 
 with open("plots/classifier/metrics.txt", "w") as f:
-    print("Pred PUFR\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1, file=f)
-    print("Truth PUFR\t","Binary Accuracy: ", BA2, "\tF1 Score: ", f12, "\tAUC: ", AUC2, file=f)
+    print("Pred\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1, file=f)
+    print("Truth\t","Binary Accuracy: ", BA2, "\tF1 Score: ", f12, "\tAUC: ", AUC2, file=f)
     print("Baseline\t","Binary Accuracy: ", BA3, "\tF1 Score: ", f13, "\tAUC: ", AUC3, file=f)
 
-print("Pred PUFR\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1)
+print("Pred\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11, "\tAUC: ", AUC1)
 print("")
-print("Truth PUFR\t","Binary Accuracy: ", BA2, "\tF1 Score: ", f12, "\tAUC: ", AUC2)
+print("Truth\t","Binary Accuracy: ", BA2, "\tF1 Score: ", f12, "\tAUC: ", AUC2)
 print("")
 print("Baseline\t","Binary Accuracy: ", BA3, "\tF1 Score: ", f13, "\tAUC: ", AUC3)
 print("")
@@ -500,14 +500,14 @@ mask = y_test==1
 plt.figure()
 plt.title("Model Score")
 
-plt.hist(pufr_pred[mask],color='r',histtype='step',label='DiHiggs (pred pufr)',bins=30,range=(0,1))
-plt.hist(pufr_pred[~mask],color='b',histtype='step',label='4b (pred pufr)',bins=30,range=(0,1))
+plt.hist(pred_pred[mask],color='r',histtype='step',label='DiHiggs (pred)',bins=30,range=(0,1))
+plt.hist(pred_pred[~mask],color='b',histtype='step',label='4b (pred)',bins=30,range=(0,1))
 
-#plt.hist(truth_pred[mask],color='k',histtype='step',label='DiHiggs (truth pufr)',bins=30,range=(0,1))
-#plt.hist(truth_pred[~mask],color='k',histtype='step',label='4b (truth pufr)',bins=30,linestyle='--',range=(0,1))
+#plt.hist(truth_pred[mask],color='k',histtype='step',label='DiHiggs (truth)',bins=30,range=(0,1))
+#plt.hist(truth_pred[~mask],color='k',histtype='step',label='4b (truth)',bins=30,linestyle='--',range=(0,1))
 
-plt.hist(baseline_pred[mask],color='r',histtype='step',label='DiHiggs (wo pufr)',bins=30,range=(0,1),linestyle='--')
-plt.hist(baseline_pred[~mask],color='b',histtype='step',label='4b (wo pufr)',bins=30,range=(0,1),linestyle='--')
+plt.hist(baseline_pred[mask],color='r',histtype='step',label='DiHiggs (baseline)',bins=30,range=(0,1),linestyle='--')
+plt.hist(baseline_pred[~mask],color='b',histtype='step',label='4b (baseline)',bins=30,range=(0,1),linestyle='--')
 
 #plt.yscale('log')
 plt.legend()
