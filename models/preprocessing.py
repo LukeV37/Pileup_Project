@@ -235,3 +235,5 @@ if debug:
     print("y_train Indices Reference:")
     print("\tNum Events: ", len(y_train))
     print("\tNum Jets: ", len(y_train[0]))
+
+print("Done!")
