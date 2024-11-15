@@ -341,7 +341,7 @@ ax2.set_xlim(0.3,1)
 plt.savefig(out_path+"/ATLAS_ROC.png")
 #plt.show()
 
-print("PUFNN\t","Binary Accuracy: ", BA1, "\tF1 Score: ", f11)
+print("\tBinary Accuracy: ", BA1, "\tF1 Score: ", f11)
 print("")
 
 #file_names = ["results/MfracNN_Results.np"]
@@ -380,3 +380,5 @@ for i in range(plot_events):
     cax = divider.append_axes('right', size='5%', pad=0.05)
     fig.colorbar(im0, cax=cax, orientation='vertical')
 """
+
+print("Done!")
