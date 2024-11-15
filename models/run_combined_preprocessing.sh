@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -z "$4" ]; then
+if [ -z "$5" ]; then
     echo "Must enter 5 agruments"
     echo "1: Run Type {Efrac|Mfrac}"
     echo "2: Path to Signal File (../pythia/output/<sig>.root)"
